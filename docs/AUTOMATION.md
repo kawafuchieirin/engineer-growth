@@ -89,6 +89,28 @@ Issue テンプレートが使う `skill` / `goal` / `blog` ラベルと、Depen
 `npm`（`pnpm-lock.yaml`）と `github-actions` を毎週月曜 09:00 JST に確認し、
 マイナー・パッチは 1 本の PR にまとめ、コミットメッセージは `chore` プレフィックスになる。
 
+## action のバージョン固定について
+
+サードパーティの action（`jdx/mise-action` / `pnpm/action-setup`）は
+**コミット SHA で固定**し、末尾のコメントに人間が読めるバージョンを書いている。
+
+```yaml
+uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+```
+
+タグは作者が後から付け替えられる。`contents: write` を持つ `profile.yml` や
+`pages: write` を持つ `pages.yml` が、タグの付け替えで差し替わったコードを
+実行すると、リポジトリへの書き込みや公開内容を奪われる。
+SHA の更新は Dependabot（`github-actions` エコシステム）が PR で提案するので、
+手で追う必要はない。
+
+`actions/*` は GitHub 自身が管理しているためメジャータグ参照のままにしている。
+
+あわせて、`actions/checkout` には `persist-credentials: false` を指定している。
+既定では checkout がトークンを `.git/config` に残すため、後続のサードパーティ
+action からも読めてしまう。push が必要な `profile.yml` では、最後の push ステップ
+だけに `GH_TOKEN` を渡している。
+
 ## ローカルで同じ検証を回す
 
 CI と同じ順序をローカルで再現できる。CI で落ちたらまずこれを実行する。
