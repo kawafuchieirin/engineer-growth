@@ -1,0 +1,319 @@
+# スキル棚卸し（単一の信頼できる情報源）
+#
+# ■ このファイルはシードデータです。level / target / experience_years /
+#   last_used / evidence はすべて「サンプル値」なので、必ず自分の実態に
+#   書き換えてください（owner.name も <あなたの名前> のままです）。
+# ■ level の意味は data/levels.yaml を参照（0-5）。
+# ■ skills[].id は目標・ロードマップ・ブログから参照されるため、
+#   追加は自由ですが既存 ID の改名・削除は参照整合性エラーになります。
+# ■ 記入方針・棚卸し手順は docs/SKILLS_GUIDE.md を参照。
+
+owner:
+  name: <あなたの名前>
+  role: バックエンド / SRE エンジニア
+  updated: 2026-10-11
+
+categories:
+  # weight は「自分のキャリアにおける重み」(0.1-2.0)。
+  # レーダーチャートの軸順と重み付き平均に使う。合計を 1 に揃える必要はない。
+  - id: languages
+    name: プログラミング言語
+    weight: 1.2
+  - id: backend
+    name: バックエンド
+    weight: 1.3
+  - id: frontend
+    name: フロントエンド
+    weight: 0.6
+  - id: infra
+    name: インフラ / SRE
+    weight: 1.5
+  - id: cloud
+    name: クラウド
+    weight: 1.3
+  - id: data
+    name: データ
+    weight: 1.0
+  - id: practice
+    name: エンジニアリング実践
+    weight: 1.1
+  - id: soft
+    name: ソフトスキル
+    weight: 0.9
+
+skills:
+  # ---- languages ----
+  - id: lang-typescript
+    name: TypeScript
+    category: languages
+    level: 3
+    target: 4
+    experience_years: 3
+    last_used: 2026-10
+    evidence:
+      - 社内 CLI ツールを型安全な設計で単独実装・運用
+      - strict モード前提のコードレビューを担当
+    links:
+      - label: TypeScript 公式ハンドブック
+        url: https://www.typescriptlang.org/docs/handbook/intro.html
+    notes: 型レベルプログラミング（conditional types）はまだ手が止まる。
+
+  - id: lang-python
+    name: Python
+    category: languages
+    level: 3
+    target: 3
+    experience_years: 4
+    last_used: 2026-08
+    evidence:
+      - 運用自動化スクリプトとバッチ処理を本番で継続運用
+    notes: 非同期（asyncio）は補助が必要。
+
+  - id: lang-go
+    name: Go
+    category: languages
+    level: 1
+    target: 3
+    experience_years: 0.5
+    last_used: 2025-04
+    notes: サンプル値。学習目的で触った段階。goroutine の実務経験はない。
+
+  - id: lang-bash
+    name: Bash / シェルスクリプト
+    category: languages
+    level: 3
+    target: 3
+    experience_years: 5
+    last_used: 2026-10
+    evidence:
+      - デプロイ・バックアップ運用スクリプトを set -euo pipefail 前提で整備
+
+  # ---- backend ----
+  - id: be-api-design
+    name: API 設計 (REST / OpenAPI)
+    category: backend
+    level: 3
+    target: 4
+    experience_years: 3
+    last_used: 2026-09
+    evidence:
+      - 外部公開 API のバージョニング方針とエラー仕様を策定
+    links:
+      - label: OpenAPI Specification
+        url: https://spec.openapis.org/oas/latest.html
+
+  - id: be-rdb
+    name: RDB 設計 / チューニング
+    category: backend
+    level: 2
+    target: 4
+    experience_years: 3
+    last_used: 2026-09
+    notes: 正規化は設計できるが、実行計画を読んだ改善は相談しながら。
+
+  - id: be-testing
+    name: 自動テスト設計
+    category: backend
+    level: 3
+    target: 4
+    experience_years: 3
+    last_used: 2026-10
+    evidence:
+      - テストピラミッドを定義し CI のテスト実行時間を 1/3 に短縮
+
+  # ---- frontend ----
+  - id: fe-react
+    name: React
+    category: frontend
+    level: 2
+    target: 3
+    experience_years: 1.5
+    last_used: 2026-06
+    notes: 管理画面の実装経験のみ。状態管理の設計判断は未経験。
+
+  - id: fe-html-css
+    name: HTML / CSS
+    category: frontend
+    level: 3
+    target: 3
+    experience_years: 5
+    last_used: 2026-10
+    evidence:
+      - レスポンシブ・ダークモード対応の静的サイトを単独で構築
+
+  # ---- infra ----
+  - id: infra-docker
+    name: Docker / コンテナ
+    category: infra
+    level: 4
+    target: 4
+    experience_years: 4
+    last_used: 2026-10
+    evidence:
+      - マルチステージビルドでイメージサイズを 70% 削減
+      - チームの Dockerfile 規約を策定しレビュー担当
+
+  - id: infra-kubernetes
+    name: Kubernetes
+    category: infra
+    level: 2
+    target: 4
+    experience_years: 1
+    last_used: 2026-07
+    notes: マニフェスト修正と調査はできるが、クラスタ設計は未経験。
+
+  - id: infra-terraform
+    name: Terraform
+    category: infra
+    level: 3
+    target: 4
+    experience_years: 2
+    last_used: 2026-09
+    evidence:
+      - 本番環境の IaC をモジュール分割して単独で設計・運用
+    links:
+      - label: Terraform スタイル規約
+        url: https://developer.hashicorp.com/terraform/language/style
+
+  - id: infra-cicd
+    name: CI/CD パイプライン
+    category: infra
+    level: 4
+    target: 5
+    experience_years: 3
+    last_used: 2026-10
+    evidence:
+      - GitHub Actions による検証・ビルド・デプロイの自動化を主導
+      - デプロイ頻度を週 1 回から日次へ改善
+
+  - id: infra-observability
+    name: 可観測性 (メトリクス / ログ / トレース)
+    category: infra
+    level: 2
+    target: 4
+    experience_years: 1.5
+    last_used: 2026-09
+    notes: ダッシュボード追加はできる。SLO 設計とトレース導入は未経験。
+
+  - id: infra-linux
+    name: Linux 運用
+    category: infra
+    level: 3
+    target: 4
+    experience_years: 5
+    last_used: 2026-10
+    evidence:
+      - 本番サーバのリソース枯渇障害を一次切り分けから恒久対応まで担当
+
+  # ---- cloud ----
+  - id: cloud-aws
+    name: AWS
+    category: cloud
+    level: 3
+    target: 4
+    experience_years: 3
+    last_used: 2026-10
+    evidence:
+      - VPC / ECS / RDS 構成の設計と本番運用を担当
+    links:
+      - label: AWS Well-Architected Framework
+        url: https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html
+
+  - id: cloud-gcp
+    name: Google Cloud
+    category: cloud
+    level: 1
+    target: 2
+    experience_years: 0.5
+    last_used: 2025-02
+    notes: サンプル値。個人検証で Cloud Run を触った程度。
+
+  # ---- data ----
+  - id: data-sql
+    name: SQL
+    category: data
+    level: 3
+    target: 4
+    experience_years: 4
+    last_used: 2026-10
+    evidence:
+      - 分析用の集計クエリを設計し、実行計画を見ながらインデックスを追加
+
+  - id: data-etl
+    name: ETL / データパイプライン
+    category: data
+    level: 2
+    target: 3
+    experience_years: 1
+    last_used: 2026-05
+    notes: 既存パイプラインの改修経験のみ。冪等性の設計は要レビュー。
+
+  # ---- practice ----
+  - id: prac-design-patterns
+    name: 設計パターン / アーキテクチャ
+    category: practice
+    level: 3
+    target: 4
+    experience_years: 3
+    last_used: 2026-10
+    evidence:
+      - レイヤ責務を定義したリポジトリ構成を設計し、チームに定着させた
+
+  - id: prac-code-review
+    name: コードレビュー
+    category: practice
+    level: 4
+    target: 4
+    experience_years: 3
+    last_used: 2026-10
+    evidence:
+      - レビュー観点リストを整備し、指摘の属人性を解消
+      - 新メンバーのレビューを継続的に担当
+
+  - id: prac-security
+    name: セキュリティ
+    category: practice
+    level: 2
+    target: 4
+    experience_years: 2
+    last_used: 2026-08
+    notes: OWASP Top 10 を踏まえた指摘はできる。脅威モデリングは未経験。
+
+  - id: prac-performance
+    name: パフォーマンスチューニング
+    category: practice
+    level: 2
+    target: 3
+    experience_years: 2
+    last_used: 2026-07
+    notes: 計測ツールは使えるが、ボトルネック特定は先輩と並走している。
+
+  # ---- soft ----
+  - id: soft-communication
+    name: コミュニケーション / 合意形成
+    category: soft
+    level: 3
+    target: 4
+    experience_years: 5
+    last_used: 2026-10
+    evidence:
+      - 他チームとの仕様調整を主担当として完了
+
+  - id: soft-mentoring
+    name: メンタリング / 育成
+    category: soft
+    level: 2
+    target: 4
+    experience_years: 1
+    last_used: 2026-09
+    notes: 新メンバーのオンボーディング補助の経験のみ。
+
+  - id: soft-writing
+    name: 技術文書 / 発信
+    category: soft
+    level: 3
+    target: 4
+    experience_years: 2
+    last_used: 2026-10
+    evidence:
+      - 設計ドキュメントと障害報告を継続的に執筆し、社内で参照されている
