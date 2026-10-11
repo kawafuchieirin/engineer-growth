@@ -78,6 +78,28 @@ Markdown から HTML への変換はここで行う（`src/lib/blog.ts` は Mark
 export function renderBlogPostPages(model: BlogModel, generatedAt: string): Array<{ fileName: string; html: string }>;
 ```
 
+## ゲーム要素のレイヤ
+
+ゲーム要素（XP・レベル・実績・クエスト・履歴）は 5 番目の領域として同じ規則に従う。
+ただし**他の 4 領域から導出される**ため、ファイルを読むのは `data/history.yaml` だけ。
+
+```
+src/lib/game-types.ts   型の契約（実行時の依存を持たない）
+src/lib/xp.ts           XP とレベルの計算（docs/GAME_DESIGN.md が規則の正）
+src/lib/streaks.ts      連続記録の判定
+src/lib/achievements.ts 実績の定義（条件はロジックなのでコードに置く）と評価
+src/lib/quests.ts       次の一手の生成
+src/lib/history.ts      data/history.yaml の読み書きと差分計算
+src/lib/game.ts         上記を束ねて GameModel を作る
+src/render/game.ts      game.html / PROFILE.md の「成長」節 / ダッシュボードのヒーロー
+```
+
+`loadGameModel({ skills, goals, roadmap, blog, now })` は 4 領域のモデルを
+**引数で受け取る**（自分で読み直さない）。build と validate が同じモデルを使い回せる。
+
+現在値のスナップショットは `history.ts` の `buildSnapshot` が唯一の組み立て場所。
+画面に出す値と `data/history.yaml` に積む値を別々に組むと、同じ日なのに食い違う。
+
 ## 参照整合性
 
 ファイルをまたぐ ID 参照は lib では検証せず、`src/commands/{build,validate}.ts` が

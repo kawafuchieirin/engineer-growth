@@ -3,6 +3,7 @@ import { loadBlogModel } from '../lib/blog.ts';
 import { loadGoalsModel } from '../lib/goals.ts';
 import { assertGoalReferences, loadRoadmapModel } from '../lib/roadmap.ts';
 import { loadSkillsModel } from '../lib/skills.ts';
+import { loadGameModel } from '../lib/game.ts';
 import type { Command } from './types.ts';
 
 export const validateCommand: Command = {
@@ -20,6 +21,9 @@ export const validateCommand: Command = {
     assertSkillReferences(skills.ids, [goals, roadmap, blog]);
     assertGoalReferences(goals.ids, [roadmap]);
 
+    // data/history.yaml のスキーマもここで確認する（build だけで落ちる状況を作らない）
+    const game = await loadGameModel({ skills, goals, roadmap, blog, now });
+
     const pct = (ratio: number) => `${Math.round(ratio * 100)}%`;
 
     log(`skills   : ${skills.ids.length} 件 / 平均レベル ${skills.stats.averageLevel.toFixed(2)}`);
@@ -33,9 +37,16 @@ export const validateCommand: Command = {
         (roadmap.stats.overdue > 0 ? ` / 遅延 ${roadmap.stats.overdue} 件` : ''),
     );
     log(`blog     : ${blog.posts.length} 記事 (下書き ${blog.drafts.length} 件)`);
+    log(
+      `game     : Lv.${game.level.level} ${game.level.title} / ${game.xp.total} XP ` +
+        `(次のレベルまで ${game.level.xpToNext} XP) / 実績 ` +
+        `${game.achievements.filter((a) => a.unlocked).length}/${game.achievements.length} / ` +
+        `記録 ${game.history.length} 件`,
+    );
 
     // データとして不正ではないが、放置すると判断材料として腐る点を見えるようにする
     for (const warning of skills.warnings) log(`warning  : ${warning}`);
+    for (const risk of game.streaks.atRisk) log(`warning  : ${risk}`);
     if (goals.stale.length > 0) {
       log(`warning  : 期間が終わった未確定の目標が ${goals.stale.length} 件あります（振り返りを記入してください）`);
     }

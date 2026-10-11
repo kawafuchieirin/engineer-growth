@@ -1,0 +1,277 @@
+# 成長の記録（スナップショット）とレベルアップのお祝い
+#
+# data/*.yaml と blog/ の「今」は見られるが、履歴が無いと「伸びた」が見えない。
+# pnpm growth snapshot で data/history.yaml に 1 日 1 行の記録を積み、
+# 記録の前後でプレイヤーレベルが上がっていたらお祝いの Issue を立てる。
+name: Snapshot
+
+on:
+  push:
+    branches: [main]
+    # 【無限ループ対策 1】パスフィルタ
+    # data/ と blog/ の変更を拾いつつ、このワークフロー自身が書き換える
+    # data/history.yaml だけを「!」で除外する。
+    # パターンは上から順に評価され、最後に一致したものが勝つ（GitHub Docs
+    # workflow-syntax の paths の仕様）。変更ファイルがすべて除外パターンに
+    # 一致する push ではワークフローは起動しないため、
+    # 「history.yaml だけを変更した自分のコミット」では再発火しない。
+    # なお「!」を使う場合は「!」なしのパターンが 1 つ以上必要（同仕様）。
+    paths:
+      - "data/**"
+      - "blog/**"
+      - "!data/history.yaml"
+  schedule:
+    # 週次: 毎週日曜 21:00 JST に記録する。
+    # cron は UTC 指定。JST(UTC+9) 日曜 21:00 − 9h = UTC 日曜 12:00。
+    # 21 − 9 = 12 で日付をまたがないので、曜日は日曜（0）のまま。
+    # 週の終わりに「今週何が伸びたか」を 1 行として残すのが自然なため。
+    - cron: "0 12 * * 0"
+  # 記録を今すぐ残したいとき用
+  workflow_dispatch:
+
+concurrency:
+  # 同時に走ると同じファイルへの push が競合するので直列化する。
+  # 進行中のコミット/push は中断させない。
+  group: snapshot
+  cancel-in-progress: false
+
+permissions:
+  # data/history.yaml をコミットして push するため
+  contents: write
+  # レベルアップ時にお祝い Issue を作成するため
+  issues: write
+
+jobs:
+  record-snapshot:
+    name: 成長の記録を追加し、レベルアップを祝う
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    env:
+      # data/history.yaml の「最後のスナップショットの level」だけを出力する小さな
+      # スクリプト。記録の前後で 2 回使うので、ここに 1 箇所だけ置いて使い回す。
+      #
+      # YAML の読み取りに Python や jq を持ち込むと依存とパース差異が増えるため、
+      # リポジトリが既に依存している yaml パッケージを Node で使う。
+      # node -e のワンライナーは読めなくなるので、ヒアドキュメント相当の
+      # 複数行文字列として渡す（--input-type=module の -e は import を
+      # カレントディレクトリ基準で解決するので node_modules/yaml が使える）。
+      #
+      # level 以外のフィールドには触らない。history.yaml の構造が変わっても
+      # このワークフローが壊れないようにするため。
+      READ_LAST_LEVEL: |
+        import { readFileSync } from 'node:fs';
+        import { parse } from 'yaml';
+
+        let level = 0;
+        try {
+          const doc = parse(readFileSync('data/history.yaml', 'utf8'));
+          const snapshots = doc?.snapshots;
+          if (Array.isArray(snapshots) && snapshots.length > 0) {
+            const last = snapshots[snapshots.length - 1];
+            if (Number.isInteger(last?.level)) {
+              level = last.level;
+            }
+          }
+        } catch (error) {
+          // 初回実行では data/history.yaml がまだ無い。レベル 0 として扱う。
+          // それ以外（YAML の破損など）は握りつぶさずそのまま失敗させる。
+          if (error.code !== 'ENOENT') {
+            throw error;
+          }
+        }
+        console.log(level);
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v7
+        with:
+          # 資格情報を .git/config に残さず、push する最後のステップだけに
+          # トークンを渡す。間に挟まるサードパーティ action にトークンを
+          # 触らせないため。
+          persist-credentials: false
+
+      - name: mise で Node をセットアップ（.mise.toml の宣言に従う）
+        # サードパーティ action は可変タグではなくコミット SHA で固定する。
+        # タグは作者が付け替えられるため、v5 のまま中身が差し替わると
+        # 書き込み権限を持つこのワークフローがそのコードを実行してしまう。
+        # SHA の更新は dependabot（github-actions エコシステム）が PR で提案する。
+        uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+
+      - name: pnpm をセットアップし、ストアをキャッシュ
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: true
+
+      - name: 依存関係をインストール（ロックファイル固定）
+        run: pnpm install --frozen-lockfile
+
+      - name: 記録前のレベルを控える
+        id: before
+        # 記録後と比較してレベルアップを検出するため、上書きされる前に読む。
+        # ファイルが無い初回実行でも落ちず 0 を返す（スクリプト側で ENOENT を処理）。
+        run: |
+          level="$(node --input-type=module -e "$READ_LAST_LEVEL")"
+          echo "level=${level}" >> "$GITHUB_OUTPUT"
+          echo "記録前のレベル: ${level}"
+
+      - name: データ検証（壊れたデータを記録しない）
+        # 検証を通らないデータから作った記録を履歴に混ぜると、
+        # 後からの差分比較がすべて嘘になるため先に止める。
+        run: pnpm validate
+
+      - name: 成長のスナップショットを記録
+        # 同じ日付の記録があれば上書きされるので、1 日に何度走っても行は増えない。
+        run: pnpm growth snapshot
+
+      - name: data/history.yaml の差分を判定
+        id: diff
+        # 差分が無ければ以降のステップを飛ばし、空コミットを作らない。
+        # 【無限ループ対策 4】差分が無いときに何も push しないこと自体が、
+        # 万一パスフィルタをすり抜けた場合の最後の歯止めになる。
+        run: |
+          if [ -n "$(git status --porcelain -- data/history.yaml)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "data/history.yaml に差分があります"
+            git --no-pager diff --stat -- data/history.yaml
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "data/history.yaml に差分はありません（コミットしません）"
+          fi
+
+      - name: 差分をコミットして push
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          # persist-credentials: false にしたため、push 先の URL に明示的に渡す
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # 【無限ループ対策 2】
+        # コミット本文に [skip ci] を入れ、パスフィルタで history.yaml を
+        # 除外していないワークフロー（ci.yml / profile.yml）も再実行させない。
+        # 【無限ループ対策 3】
+        # 加えて GITHUB_TOKEN による push はいかなるワークフローも再発火しない
+        # ため、パスフィルタ・[skip ci]・トークンの仕様で三重に止まっている。
+        #
+        # 記録は「他の生成物に影響されない」よう data/history.yaml だけを add する。
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/history.yaml
+          git commit -m 'chore: 成長の記録を追加' -m 'pnpm growth snapshot で data/history.yaml を更新した。[skip ci]'
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF_NAME}"
+
+      - name: 記録後のレベルを読む
+        id: after
+        if: steps.diff.outputs.changed == 'true'
+        # push が成功した記録だけを祝う（push に失敗したら祝う前に失敗で止まる）
+        run: |
+          level="$(node --input-type=module -e "$READ_LAST_LEVEL")"
+          echo "level=${level}" >> "$GITHUB_OUTPUT"
+          echo "記録後のレベル: ${level}"
+
+      - name: レベルアップならお祝い Issue を作成
+        if: steps.diff.outputs.changed == 'true'
+        # YAML の読み取りは上のシェルステップに寄せ、このステップは
+        # GitHub API との対話（重複確認・ラベル・Issue 作成）だけを担う。
+        # 認証済みクライアントと paginate が要るので github-script を使う。
+        uses: actions/github-script@v9
+        env:
+          BEFORE_LEVEL: ${{ steps.before.outputs.level }}
+          AFTER_LEVEL: ${{ steps.after.outputs.level }}
+        with:
+          # 既定の GITHUB_TOKEN を使う（シークレットのハードコードはしない）
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const LABEL = 'level-up';
+
+            const before = Number(process.env.BEFORE_LEVEL);
+            const after = Number(process.env.AFTER_LEVEL);
+            if (!Number.isInteger(before) || !Number.isInteger(after)) {
+              core.setFailed(`レベルを数値として読めませんでした: before=${process.env.BEFORE_LEVEL} after=${process.env.AFTER_LEVEL}`);
+              return;
+            }
+
+            if (after < before) {
+              // データを直してレベルが落ちることはありうる。履歴としては正しいので
+              // 失敗にはせず、気づけるようにログだけ残す。
+              core.info(`レベルが ${before} から ${after} に下がりました。Issue は作成しません。`);
+              return;
+            }
+            if (after === before) {
+              core.info(`レベルは ${after} のままです。Issue は作成しません。`);
+              return;
+            }
+
+            const title = `🎉 レベル ${after} に到達しました`;
+
+            // --- 重複防止: 同じレベルの Issue があれば何もしない ---
+            // ワークフローの再実行や、データ修正でレベルが下がって再び上がった
+            // ときに同じ祝いが並ばないようにする。
+            // 読んだら閉じる Issue なので open だけでは足りず、state: 'all' で
+            // 走査する。ラベル検索に頼ると「ラベルを外された Issue」を
+            // 見逃すため、タイトルのキーで判定する（growth-review.yml と同じ手法）。
+            const key = `レベル ${after} に到達`;
+            const issues = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner: context.repo.owner, repo: context.repo.repo, state: 'all', per_page: 100 },
+            );
+            const duplicate = issues.find(
+              (issue) => !issue.pull_request && issue.title.includes(key),
+            );
+            if (duplicate) {
+              core.info(`レベル ${after} の Issue は既に存在します: #${duplicate.number} をスキップ`);
+              return;
+            }
+
+            // --- ラベルが無いリポジトリでも失敗させない ---
+            // 作成済みなら 422 が返るだけなので握りつぶさず内容を確認して続行する。
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: LABEL,
+                color: 'fbca04',
+                description: 'プレイヤーレベルの到達記録',
+              });
+              core.info(`ラベル ${LABEL} を作成しました`);
+            } catch (error) {
+              if (error.status === 422) {
+                core.info(`ラベル ${LABEL} は既に存在します`);
+              } else {
+                core.warning(`ラベル ${LABEL} の作成に失敗しました: ${error.message}`);
+              }
+            }
+
+            const { owner, repo } = context.repo;
+            const profileUrl = `https://github.com/${owner}/${repo}/blob/main/PROFILE.md#成長`;
+            // github.io のホスト名は小文字でないと解決しない
+            const gameUrl = `https://${owner.toLowerCase()}.github.io/${repo}/game.html`;
+
+            const body = [
+              `レベル **${before} → ${after}** に上がりました。おめでとうございます。`,
+              '',
+              `\`data/history.yaml\` に積んだ記録を前回と比べて検出しました。`,
+              '内容を確認したらこの Issue は閉じてよい（記録そのものは履歴に残る）。',
+              '',
+              '### 何が伸びたかを見る',
+              '',
+              `- [\`PROFILE.md\` の「成長」節](${profileUrl}) — 前回の記録・直近 90 日・始めてからの差分`,
+              `- [公開サイトの \`game.html\`](${gameUrl}) — XP の内訳とレベルの進捗（**GitHub Pages を有効にしていれば**閲覧できる。手順は \`docs/AUTOMATION.md\`）`,
+              '',
+              '### 次に伸ばすなら',
+              '',
+              '- `pnpm growth skills-report --gaps` — 目標レベルとの差が大きいスキルを一覧する',
+              '- `docs/GAME_DESIGN.md` — XP・レベル・称号の規則。次のレベルに必要な累計 XP はここで確認する',
+              '',
+              '---',
+              '',
+              `_このIssueは \`.github/workflows/snapshot.yml\` により自動作成されました（レベル ${before} → ${after}）。_`,
+            ].join('\n');
+
+            const created = await github.rest.issues.create({
+              owner,
+              repo,
+              title,
+              body,
+              labels: [LABEL],
+            });
+            core.info(`Issue を作成しました: #${created.data.number}`);

@@ -2,11 +2,18 @@
 import { buildCommand } from './commands/build.ts';
 import { newPostCommand } from './commands/new-post.ts';
 import { skillsReportCommand } from './commands/skills-report.ts';
+import { snapshotCommand } from './commands/snapshot.ts';
 import { validateCommand } from './commands/validate.ts';
 import type { Command } from './commands/types.ts';
 import { GrowthError } from './lib/errors.ts';
 
-const commands: Command[] = [validateCommand, buildCommand, newPostCommand, skillsReportCommand];
+const commands: Command[] = [
+  validateCommand,
+  buildCommand,
+  snapshotCommand,
+  newPostCommand,
+  skillsReportCommand,
+];
 
 function printUsage(): void {
   console.log('使い方: pnpm growth <command> [options]\n');

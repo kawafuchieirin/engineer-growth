@@ -8,8 +8,15 @@ import { loadBlogModel } from '../lib/blog.ts';
 import { loadGoalsModel } from '../lib/goals.ts';
 import { assertGoalReferences, loadRoadmapModel } from '../lib/roadmap.ts';
 import { loadSkillsModel } from '../lib/skills.ts';
+import { loadGameModel } from '../lib/game.ts';
 import { renderBlogCard, renderBlogIndexPage, renderBlogPostPages, renderBlogMarkdown } from '../render/blog.ts';
 import { renderDashboardPage } from '../render/dashboard.ts';
+import {
+  renderGameCard,
+  renderGameHero,
+  renderGameMarkdown,
+  renderGamePage,
+} from '../render/game.ts';
 import { renderGoalsCard, renderGoalsMarkdown, renderGoalsPage } from '../render/goals.ts';
 import { renderProfileMarkdown } from '../render/profile.ts';
 import { renderRoadmapCard, renderRoadmapMarkdown, renderRoadmapPage } from '../render/roadmap.ts';
@@ -33,6 +40,9 @@ export const buildCommand: Command = {
     assertSkillReferences(skills.ids, [goals, roadmap, blog]);
     assertGoalReferences(goals.ids, [roadmap]);
 
+    // ゲーム要素は 4 領域から導出するので、参照整合性を確認した後に組む
+    const game = await loadGameModel({ skills, goals, roadmap, blog, now });
+
     await rm(paths.dist, { recursive: true, force: true });
     await mkdir(resolve(paths.dist, 'assets'), { recursive: true });
     await copyFile(resolve(paths.root, 'assets', 'style.css'), resolve(paths.dist, 'assets', 'style.css'));
@@ -41,7 +51,9 @@ export const buildCommand: Command = {
       resolve(paths.dist, 'index.html'),
       renderDashboardPage({
         generatedAt,
+        hero: renderGameHero(game),
         cards: [
+          renderGameCard(game),
           renderSkillsCard(skills),
           renderGoalsCard(goals),
           renderRoadmapCard(roadmap),
@@ -49,6 +61,7 @@ export const buildCommand: Command = {
         ],
       }),
     );
+    await writeOut(resolve(paths.dist, 'game.html'), renderGamePage(game, generatedAt));
     await writeOut(resolve(paths.dist, 'skills.html'), renderSkillsPage(skills, generatedAt));
     await writeOut(resolve(paths.dist, 'goals.html'), renderGoalsPage(goals, generatedAt));
     await writeOut(resolve(paths.dist, 'roadmap.html'), renderRoadmapPage(roadmap, generatedAt));
@@ -63,6 +76,7 @@ export const buildCommand: Command = {
       renderProfileMarkdown({
         generatedOn: toJstDate(now),
         sections: [
+          renderGameMarkdown(game),
           renderSkillsMarkdown(skills),
           renderGoalsMarkdown(goals),
           renderRoadmapMarkdown(roadmap),
@@ -72,6 +86,10 @@ export const buildCommand: Command = {
     );
 
     log(`dist/ を生成しました (ブログ記事 ${blog.posts.length} 件)`);
+    log(
+      `レベル ${game.level.level}（${game.level.title}）/ ${game.xp.total} XP / ` +
+        `実績 ${game.achievements.filter((a) => a.unlocked).length}/${game.achievements.length} 解放`,
+    );
     log('PROFILE.md を更新しました');
   },
 };

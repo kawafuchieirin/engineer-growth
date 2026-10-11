@@ -461,3 +461,339 @@ table.table tr:last-child td {
   padding: 16px;
   margin: 12px 0;
 }
+
+/* ===================================================================
+ * ゲーム要素（XP・レベル・実績・クエスト・成長の差分）
+ *
+ * 「伸びた」が一目で分かることを優先する。数字そのものより、
+ * 前回との差・次のレベルまでの距離・途切れそうな継続を目立たせる。
+ * =================================================================== */
+
+:root {
+  --xp: #7c5cff;
+  --xp-soft: #ece7ff;
+  --flame: #e8590c;
+  --bronze: #a1662f;
+  --silver: #8a94a6;
+  --gold: #c99a06;
+  --platinum: #4aa3c7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --xp: #a78bfa;
+    --xp-soft: #2a2545;
+    --flame: #ff8c42;
+    --bronze: #c08552;
+    --silver: #aab3c2;
+    --gold: #e3bb3b;
+    --platinum: #6cc4e8;
+  }
+}
+
+/* ---- レベルのヒーローパネル ---- */
+.hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.hero__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.level-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--xp-soft);
+  border: 2px solid var(--xp);
+  color: var(--xp);
+}
+
+.level-badge__num {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.level-badge__label {
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero__headline {
+  min-width: 0;
+}
+
+.level-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.hero__xp {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  margin: 2px 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- XP バー ---- */
+.xp-bar {
+  position: relative;
+  height: 14px;
+  background: var(--surface-alt);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.xp-bar__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--xp), var(--accent));
+}
+
+.xp-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 成長の差分 ---- */
+.delta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.delta {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.delta__label {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin: 0 0 2px;
+}
+
+.delta__value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+.delta--up .delta__value {
+  color: var(--success);
+}
+
+.delta--down .delta__value {
+  color: var(--danger);
+}
+
+.delta--flat .delta__value {
+  color: var(--text-muted);
+}
+
+/* ---- ストリーク ---- */
+.streak-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--flame) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--flame) 35%, transparent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--flame);
+}
+
+.streak--idle {
+  background: var(--surface-alt);
+  border-color: var(--border);
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.streak__count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- クエスト ---- */
+.quest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.quest {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 10px;
+}
+
+.quest--now {
+  border-left-color: var(--danger);
+}
+
+.quest--later {
+  border-left-color: var(--border);
+}
+
+.quest__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.quest__title {
+  font-weight: 600;
+  margin: 0 0 2px;
+}
+
+.quest__why {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.quest__target {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.quest__xp {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--xp-soft);
+  color: var(--xp);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 実績バッジ ---- */
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.achievement {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.achievement__icon {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  flex: 0 0 auto;
+}
+
+.achievement__name {
+  font-weight: 600;
+  margin: 0 0 2px;
+  font-size: 0.95rem;
+}
+
+.achievement__desc {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.achievement__detail {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 6px 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 未解放は「見えているが届いていない」状態にする。隠すと目標にならない。 */
+.achievement.is-locked {
+  background: var(--surface-alt);
+  border-style: dashed;
+}
+
+.achievement.is-locked .achievement__icon {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.achievement.is-locked .achievement__name {
+  color: var(--text-muted);
+}
+
+.achievement[data-tier='bronze'] {
+  border-left: 3px solid var(--bronze);
+}
+
+.achievement[data-tier='silver'] {
+  border-left: 3px solid var(--silver);
+}
+
+.achievement[data-tier='gold'] {
+  border-left: 3px solid var(--gold);
+}
+
+.achievement[data-tier='platinum'] {
+  border-left: 3px solid var(--platinum);
+}
+
+/* ---- 履歴グラフ ---- */
+.spark {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
