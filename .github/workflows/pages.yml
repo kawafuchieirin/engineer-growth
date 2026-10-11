@@ -1,0 +1,80 @@
+# GitHub Pages への公開
+#
+# pnpm build が出力する dist/ をそのまま Pages アーティファクトとして公開する。
+# dist/ は Git 管理外（.gitignore）なので、公開のたびに CI 上で生成する。
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    # サイトの内容に影響するパスだけに限定する。
+    # docs/ や README.md の変更で再デプロイしても出力は変わらないため。
+    paths:
+      - "data/**"
+      - "blog/**"
+      - "src/**"
+      - "assets/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # OIDC で Pages にデプロイするために必要（トークンのハードコードは不要）
+  pages: write
+  id-token: write
+
+# デプロイは途中で止めると公開状態が中途半端になりうるので中断しない。
+# 連続 push 時は順番に実行される。
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: サイトをビルドしてアーティファクト化
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v7
+
+      - name: mise で Node をセットアップ（.mise.toml の宣言に従う）
+        uses: jdx/mise-action@v5
+
+      - name: pnpm をセットアップし、ストアをキャッシュ
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
+
+      - name: 依存関係をインストール（ロックファイル固定）
+        run: pnpm install --frozen-lockfile
+
+      - name: データ検証（壊れたデータを公開しない）
+        run: pnpm validate
+
+      - name: 静的サイトをビルド（dist/ を生成）
+        run: pnpm build
+
+      - name: Pages の設定を読み込む（base URL の解決）
+        uses: actions/configure-pages@v6
+
+      - name: dist/ を Pages アーティファクトとしてアップロード
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: GitHub Pages へデプロイ
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    # Pages の保護ルールと公開 URL の表示に必要
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: アーティファクトを公開
+        id: deployment
+        uses: actions/deploy-pages@v5

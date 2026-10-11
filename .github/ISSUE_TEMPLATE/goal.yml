@@ -1,0 +1,55 @@
+name: 新しい目標の提案
+description: data/goals.yaml に追加する Objective と Key Results を検討する
+title: "goal: <Objective>"
+labels: ["goal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        OKR の立て方は `docs/GOALS_GUIDE.md` を参照してください。
+        Key Results は「達成したかどうかを後から機械的に判定できる」数値にします。
+  - type: input
+    id: objective
+    attributes:
+      label: Objective
+      description: 達成したい状態を一文で（定性的でよい）
+      placeholder: 障害対応を属人化させず、オンコールを自信を持って回せる状態にする
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: なぜ
+      description: この目標を今やる理由。キャリア上の位置づけと、やらない場合のリスク
+      placeholder: |
+        オンコールが特定メンバーに偏っており、休暇が取りづらい。
+        SRE としての市場価値もここが弱点になっている。
+    validations:
+      required: true
+  - type: textarea
+    id: key-results
+    attributes:
+      label: Key Results
+      description: 計測可能な指標と目標値を 2-4 個（現在値 → 目標値の形で）
+      placeholder: |
+        - 主要アラートの Runbook 整備率 40% → 100%
+        - 一次対応を自分以外で完了できた割合 20% → 60%
+        - ポストモーテム作成 0 件 → 3 件
+    validations:
+      required: true
+  - type: input
+    id: quarter
+    attributes:
+      label: 対象四半期
+      description: YYYY-QN 形式（data/goals.yaml の quarter と一致させる）
+      placeholder: "2027-Q1"
+    validations:
+      required: true
+  - type: input
+    id: related-skills
+    attributes:
+      label: 関連スキル ID
+      description: data/skills.yaml の ID をカンマ区切りで（任意）
+      placeholder: infra-observability, prac-code-review
+    validations:
+      required: false

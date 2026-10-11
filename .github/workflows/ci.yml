@@ -1,0 +1,60 @@
+# 検証ワークフロー（型・テスト・データ整合性・ビルド）
+#
+# このリポジトリは data/*.yaml と blog/posts/*.md を単一の情報源とし、
+# dist/ と PROFILE.md を生成する。壊れた状態が main に入ると生成物まで
+# 壊れるため、push / PR のすべてでローカルと同じ検証（pnpm verify 相当）を回す。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # 原因切り分けのため手動実行も許可する
+  workflow_dispatch:
+
+# 同一ブランチで新しい push があれば古い実行は無駄なので止める。
+# （デプロイではなく検証なので中断しても副作用がない）
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# 既定の広い権限を使わず、必要な「読み取り」だけを明示する（最小権限）
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: 型・テスト・検証・ビルド
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v7
+
+      - name: mise で Node をセットアップ（.mise.toml の宣言に従う）
+        # ローカルと同じバージョン定義（node = "24"）を使うため
+        # setup-node ではなく mise-action を使う
+        uses: jdx/mise-action@v5
+
+      - name: pnpm をセットアップし、ストアをキャッシュ
+        # バージョンは package.json の packageManager から読み取られる
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
+
+      - name: 依存関係をインストール（ロックファイル固定）
+        # ロックファイルと package.json がずれていればここで失敗させる
+        run: pnpm install --frozen-lockfile
+
+      - name: 型チェック（tsc --noEmit）
+        run: pnpm typecheck
+
+      - name: ユニットテスト（vitest）
+        run: pnpm test
+
+      - name: データ検証（スキーマ + スキル ID の参照整合性）
+        run: pnpm validate
+
+      - name: サイトと PROFILE.md のビルド
+        run: pnpm build

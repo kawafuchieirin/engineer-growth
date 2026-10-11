@@ -1,0 +1,52 @@
+name: スキル棚卸しの更新
+description: data/skills.yaml のレベルや実績を更新する
+title: "skill: <スキル ID> のレベルを更新"
+labels: ["skill"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        レベルの定義は `data/levels.yaml`、記入方針は `docs/SKILLS_GUIDE.md` を参照してください。
+        自己評価は「根拠を書けるか」で判断します。
+  - type: input
+    id: skill-id
+    attributes:
+      label: 対象スキル ID
+      description: data/skills.yaml の skills[].id をそのまま書く（新規追加なら新しい ID）
+      placeholder: infra-terraform
+    validations:
+      required: true
+  - type: dropdown
+    id: new-level
+    attributes:
+      label: 新しいレベル (0-5)
+      description: data/levels.yaml の定義に対応する
+      options:
+        - "0 — 未経験"
+        - "1 — 入門"
+        - "2 — 補助付き実務"
+        - "3 — 自走"
+        - "4 — 牽引"
+        - "5 — 第一人者"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 根拠
+      description: そのレベルだと言える具体的な事実（担当した業務・成果物・リンク）
+      placeholder: |
+        - 本番の VPC / EKS 構成を Terraform で設計・移行（PR: ...）
+        - モジュール分割とレビュー体制を整備し、他メンバーのレビューを担当
+    validations:
+      required: true
+  - type: textarea
+    id: next-action
+    attributes:
+      label: next action
+      description: 次のレベルに上げるために次の四半期でやること（1-3 個）
+      placeholder: |
+        - Terraform の状態管理を複数環境に分割して運用する
+        - CI で plan の自動レビューを導入する
+    validations:
+      required: true

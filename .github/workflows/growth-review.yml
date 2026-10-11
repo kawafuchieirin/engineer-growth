@@ -1,0 +1,116 @@
+# 四半期の振り返りリマインド Issue を自動作成する
+#
+# 成長管理は「思い出したらやる」と続かないので、四半期の頭に
+# やることチェックリスト付きの Issue を機械的に立てる。
+name: Growth Review
+
+on:
+  schedule:
+    # 四半期の初日 09:00 JST に実行する。
+    # cron は UTC 指定: JST(UTC+9) 1日 09:00 = UTC 1日 00:00。
+    # 本来は「第1営業日」に出したいが、cron には営業日の概念が無く
+    # 祝日判定も持てないため、1/4/7/10 月の 1 日固定で妥協している。
+    # 1 日が休日なら実際に着手するのは次の営業日でよい（Issue は残る）。
+    - cron: "0 0 1 1,4,7,10 *"
+  # 期の途中で作り直したいとき用
+  workflow_dispatch:
+
+permissions:
+  # Issue の作成とラベル付与にのみ書き込みが必要（contents は読まない）
+  issues: write
+
+jobs:
+  create-review-issue:
+    name: 振り返り Issue を作成（重複時はスキップ）
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: 四半期の振り返り Issue を作成
+        uses: actions/github-script@v9
+        with:
+          # 既定の GITHUB_TOKEN を使う（シークレットのハードコードはしない）
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const LABEL = 'growth-review';
+
+            // 実行時刻は UTC なので JST に直してから四半期を判定する。
+            // （UTC 00:00 = JST 09:00 で日付がずれるため必須）
+            const jst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+            const year = jst.getUTCFullYear();
+            const month = jst.getUTCMonth() + 1;
+            const quarter = Math.floor((month - 1) / 3) + 1;
+            const current = `${year}-Q${quarter}`;
+            const prev = quarter === 1
+              ? `${year - 1}-Q4`
+              : `${year}-Q${quarter - 1}`;
+
+            // タイトル先頭の [YYYY-QN] を重複判定のキーにする
+            const title = `[${current}] 四半期の振り返りと次期目標策定`;
+
+            // --- 重複防止: 同じ四半期の未クローズ Issue があれば何もしない ---
+            // ラベル検索だけに頼ると「ラベルを外された Issue」を見逃すので
+            // open な Issue を走査してタイトルのキーで判定する。
+            const openIssues = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100 },
+            );
+            const duplicate = openIssues.find(
+              (issue) => !issue.pull_request && issue.title.includes(`[${current}]`),
+            );
+            if (duplicate) {
+              core.info(`${current} の Issue は既に存在します: #${duplicate.number} をスキップ`);
+              return;
+            }
+
+            // --- ラベルが無いリポジトリでも失敗させない ---
+            // 作成済みなら 422 が返るだけなので握りつぶさず内容を確認して続行する。
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: LABEL,
+                color: '0e8a16',
+                description: '四半期の振り返りと目標策定',
+              });
+              core.info(`ラベル ${LABEL} を作成しました`);
+            } catch (error) {
+              if (error.status === 422) {
+                core.info(`ラベル ${LABEL} は既に存在します`);
+              } else {
+                core.warning(`ラベル ${LABEL} の作成に失敗しました: ${error.message}`);
+              }
+            }
+
+            const body = [
+              `${prev} の振り返りと ${current} の目標策定を行う。`,
+              '',
+              '上から順に進める。各ステップは `data/` か `blog/` の編集で完了する。',
+              '',
+              `- [ ] **スキル棚卸しの更新** — \`data/skills.yaml\` の \`level\` / \`last_used\` / \`evidence\` を現状に合わせる`,
+              `- [ ] **KR 実績の記入** — \`data/goals.yaml\` の ${prev} の Key Results に実績値を入れる`,
+              `- [ ] **振り返りの記述** — ${prev} の \`retrospective\`（できたこと / できなかったこと / 学び）を書く`,
+              `- [ ] **次期 OKR の策定** — ${current} の Objective と Key Results（計測可能な数値）を追加する`,
+              '- [ ] **ロードマップの見直し** — `data/roadmap.yaml` のマイルストーンの進捗・期日を更新する',
+              `- [ ] **ブログ 1 本** — ${prev} の学びを \`blog/posts/\` に記事として書く`,
+              '',
+              '### 完了条件',
+              '',
+              '- `pnpm verify` が通る（型チェック・テスト・データ検証・ビルド）',
+              '- `PROFILE.md` は手で編集せず、生成結果をコミットする',
+              '',
+              '参考: `docs/SKILLS_GUIDE.md` / `docs/GOALS_GUIDE.md` / `docs/ROADMAP_GUIDE.md` / `docs/BLOG_GUIDE.md`',
+              '',
+              '---',
+              '',
+              `_このIssueは \`.github/workflows/growth-review.yml\` により自動作成されました（対象: ${current}）。_`,
+            ].join('\n');
+
+            const created = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: [LABEL],
+            });
+            core.info(`Issue を作成しました: #${created.data.number}`);

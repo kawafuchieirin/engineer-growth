@@ -1,0 +1,87 @@
+# PROFILE.md の自動更新
+#
+# PROFILE.md は pnpm build の生成物でありコミット対象。
+# 手で更新し忘れると data/ の実態とプロフィールがずれるため、
+# データ変更時と週次で再生成して差分があればコミットする。
+name: Profile
+
+on:
+  push:
+    branches: [main]
+    # 【無限ループ対策 1】
+    # 生成元（data/ と blog/）の変更だけをトリガーにする。
+    # このワークフロー自身がコミットするのは PROFILE.md だけなので、
+    # そのコミットはこのパスフィルタに一致せず再発火しない。
+    paths:
+      - "data/**"
+      - "blog/**"
+  schedule:
+    # 週次: 毎週月曜 08:00 JST に再生成する。
+    # cron は UTC 指定。JST(UTC+9) 月曜 08:00 = UTC 日曜 23:00。
+    # 「last_used が古いスキル」など時間経過で変わる集計を追従させるため。
+    - cron: "0 23 * * 0"
+  workflow_dispatch:
+
+concurrency:
+  # 同時に走ると同じファイルへの push が競合するので直列化する。
+  # 進行中のコミット/push は中断させない。
+  group: profile
+  cancel-in-progress: false
+
+permissions:
+  # PROFILE.md をコミットして push するために書き込みが必要
+  contents: write
+
+jobs:
+  update-profile:
+    name: PROFILE.md を再生成してコミット
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v7
+
+      - name: mise で Node をセットアップ（.mise.toml の宣言に従う）
+        uses: jdx/mise-action@v5
+
+      - name: pnpm をセットアップし、ストアをキャッシュ
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
+
+      - name: 依存関係をインストール（ロックファイル固定）
+        run: pnpm install --frozen-lockfile
+
+      - name: データ検証（壊れたデータから生成物を作らない）
+        run: pnpm validate
+
+      - name: PROFILE.md と dist/ を再生成
+        run: pnpm build
+
+      - name: PROFILE.md の差分を判定
+        id: diff
+        # 差分が無ければ以降のステップを飛ばし、空コミットを作らない
+        run: |
+          if [ -n "$(git status --porcelain -- PROFILE.md)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "PROFILE.md に差分があります"
+            git --no-pager diff --stat -- PROFILE.md
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "PROFILE.md に差分はありません（コミットしません）"
+          fi
+
+      - name: 差分をコミットして push
+        if: steps.diff.outputs.changed == 'true'
+        # 【無限ループ対策 2】
+        # コミット本文に [skip ci] を入れ、パスフィルタの無いワークフロー
+        # （ci.yml など）も再実行されないようにする。
+        # 加えて GITHUB_TOKEN による push はワークフローを再発火しないため、
+        # 三重に歯止めがかかっている。
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add PROFILE.md
+          git commit -m 'chore: PROFILE.md を自動更新' -m 'data/ と blog/ の内容から pnpm build で再生成した。[skip ci]'
+          git push
