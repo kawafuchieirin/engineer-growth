@@ -1,0 +1,18 @@
+# 空の Issue も許可する（定型に当てはまらないメモや調査タスク用）
+blank_issues_enabled: true
+contact_links:
+  - name: スキル棚卸しの書き方
+    url: https://github.com/kawafuchieirin/engineer-growth/blob/main/docs/SKILLS_GUIDE.md
+    about: レベル 0-5 の定義と自己評価の付け方はこちら。
+  - name: OKR の立て方
+    url: https://github.com/kawafuchieirin/engineer-growth/blob/main/docs/GOALS_GUIDE.md
+    about: Objective / Key Results の書き方と四半期の回し方はこちら。
+  - name: ロードマップの切り方
+    url: https://github.com/kawafuchieirin/engineer-growth/blob/main/docs/ROADMAP_GUIDE.md
+    about: マイルストーンの粒度と期日の決め方はこちら。
+  - name: ブログの書き方
+    url: https://github.com/kawafuchieirin/engineer-growth/blob/main/docs/BLOG_GUIDE.md
+    about: front matter と記事テンプレートの使い方はこちら。
+  - name: 自動化とリポジトリ初期設定
+    url: https://github.com/kawafuchieirin/engineer-growth/blob/main/docs/AUTOMATION.md
+    about: GitHub Actions の役割、Pages の有効化手順、失敗時の切り分けはこちら。

@@ -1,0 +1,51 @@
+# 依存関係とワークフローの自動更新
+#
+# 個人リポジトリなので PR が多いと確認しきれない。
+# マイナー・パッチはまとめて 1 本にし、メジャーだけ個別に出す。
+version: 2
+updates:
+  # pnpm-lock.yaml は npm エコシステムとして扱われる
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    commit-message:
+      # コンベンショナルコミット準拠（chore: bump ... の形になる）
+      prefix: chore
+      include: scope
+    groups:
+      # 破壊的変更を含まない更新は 1 本の PR にまとめる
+      npm-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    labels:
+      - dependencies
+
+  # ワークフローで使う action のバージョン追従
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+    groups:
+      actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    labels:
+      - dependencies
+      - github-actions

@@ -1,0 +1,176 @@
+# ロードマップの単一の信頼できる情報源。
+# ここに書かれた値はすべて「書き方を示すためのサンプル」であり、実績ではない。
+#
+# 書き方の指針は docs/ROADMAP_GUIDE.md を参照。
+#   - tracks     … 並行して伸ばす軸。3〜4 本に絞る（増やすと「全部やる」計画になる）。
+#   - milestones … 1〜3ヶ月で終わる塊。outcome に「何ができたら終わりか」を書く。
+#   - depends_on … 先に終わっていないと着手しても無駄になるものだけを書く。
+
+updated: 2026-10-11
+
+tracks:
+  - id: infra
+    name: インフラ / SRE
+  - id: design
+    name: 設計力 / コード品質
+  - id: data
+    name: データ / 分析基盤
+  - id: output
+    name: 発信 / 育成
+
+milestones:
+  - id: m-review-guideline
+    title: レビュー観点ガイドラインの合意
+    track: design
+    status: done
+    start: 2026-10-01
+    due: 2026-10-31
+    skills: [prac-code-review, prac-design-patterns, soft-communication]
+    goals: [g-2026q4-review]
+    outcome: |
+      レビュー観点が文書化され、チーム全員が「この指摘は必須か推奨か」を見分けられる。
+      新規参加者が初回レビューを単独で出せる。
+    steps:
+      - description: 直近 3 ヶ月のレビューコメントを分類して頻出観点を洗い出す
+        done: true
+      - description: 必須・推奨の二段階でガイドラインを起草する
+        done: true
+      - description: チームレビューで合意し、PR テンプレートから参照する
+        done: true
+
+  - id: m-tf-module-split
+    title: Terraform の共通モジュール切り出し
+    track: infra
+    status: in_progress
+    start: 2026-10-01
+    due: 2026-11-30
+    skills: [infra-terraform, cloud-aws]
+    goals: [g-2026q4-iac]
+    outcome: |
+      VPC・RDS・ECS の構成がモジュール経由で記述され、本番とステージングが
+      同じモジュールの異なる変数で表現されている。plan の差分がゼロで安定する。
+    steps:
+      - description: 既存リソースを import して現状をコードに写し取る
+        done: true
+      - description: 環境差分を変数に切り出し、VPC モジュールを作る
+        done: true
+      - description: RDS / ECS モジュールを作り本番から参照する
+        done: false
+      - description: plan 差分ゼロを 2 週連続で確認する
+        done: false
+
+  - id: m-api-contract
+    title: API 契約の明文化とスキーマ駆動テスト
+    track: design
+    status: blocked
+    start: 2026-11-01
+    due: 2026-12-31
+    skills: [be-api-design, be-testing, lang-typescript]
+    outcome: |
+      主要エンドポイントの入出力が OpenAPI として定義され、その定義から生成した
+      テストが CI で動く。クライアント側の実装が定義だけを見て進められる。
+    blocked_reason: 認証方式の刷新が別チームで進行中で、エンドポイント構成が確定していない
+    depends_on: [m-review-guideline]
+    steps:
+      - description: 既存エンドポイントの入出力を棚卸しする
+        done: true
+      - description: OpenAPI 定義を書き、レビューで合意する
+        done: false
+      - description: 定義からの契約テストを CI に組み込む
+        done: false
+
+  - id: m-ci-iac-pipeline
+    title: IaC の CI/CD パイプライン整備
+    track: infra
+    status: planned
+    start: 2026-12-01
+    due: 2027-01-31
+    skills: [infra-cicd, infra-terraform, lang-bash]
+    goals: [g-2026q4-iac]
+    outcome: |
+      PR で plan が自動投稿され、main へのマージで apply される。
+      手元から apply する運用が廃止され、変更履歴が PR に残る。
+    depends_on: [m-tf-module-split]
+    steps:
+      - description: plan を PR にコメントするワークフローを作る
+        done: false
+      - description: apply 用の権限を最小権限の IAM ロールに分離する
+        done: false
+      - description: 手元 apply を禁止し、手順書を更新する
+        done: false
+
+  - id: m-etl-metrics
+    title: 開発指標の収集パイプライン
+    track: data
+    status: planned
+    start: 2027-01-01
+    due: 2027-03-31
+    skills: [data-etl, data-sql, lang-python]
+    outcome: |
+      リードタイム・変更失敗率が週次で自動集計され、ダッシュボードから参照できる。
+      改善の議論が体感ではなく数字から始められる。
+    steps:
+      - description: 収集したい指標とその定義を決める
+        done: false
+      - description: リポジトリ・CI から日次で取り込む ETL を書く
+        done: false
+      - description: 週次集計クエリとダッシュボードを用意する
+        done: false
+
+  - id: m-k8s-prod
+    title: Kubernetes 本番ワークロードの一次対応
+    track: infra
+    status: planned
+    start: 2027-02-01
+    due: 2027-04-30
+    skills: [infra-kubernetes, infra-docker, infra-linux]
+    goals: [g-2027q1-k8s]
+    outcome: |
+      本番の Pod 異常・ノード障害に対して、手順を見ながらでなく自分の判断で
+      一次対応できる。対応記録がポストモーテムとして残っている。
+    depends_on: [m-ci-iac-pipeline]
+    steps:
+      - description: クラスタ構成とマニフェストを読み解いて図にする
+        done: false
+      - description: ステージングでデプロイ・ロールバックを反復する
+        done: false
+      - description: 障害訓練で一次対応を担当する
+        done: false
+
+  - id: m-slo-observability
+    title: SLO とアラートの再設計
+    track: infra
+    status: planned
+    start: 2027-05-01
+    due: 2027-07-31
+    skills: [infra-observability, prac-performance, infra-linux]
+    outcome: |
+      主要サービスに SLO が定義され、アラートが SLO 違反の予兆にのみ鳴る。
+      「鳴っても無視するアラート」がゼロになる。
+    depends_on: [m-k8s-prod]
+    steps:
+      - description: 現行アラートを棚卸しし、無視されているものを特定する
+        done: false
+      - description: ユーザー影響を基準に SLI / SLO を定義する
+        done: false
+      - description: バーンレートアラートに置き換える
+        done: false
+
+  - id: m-blog-cadence
+    title: 技術発信の習慣化
+    track: output
+    status: in_progress
+    start: 2026-10-01
+    due: 2027-09-30
+    skills: [soft-writing, soft-mentoring]
+    goals: [g-2027q1-output]
+    outcome: |
+      月 1 本以上の記事が 1 年間継続し、ネタ出しから公開までの流れが
+      自分の中で型になっている。社外から反応が来る記事が複数本ある。
+    steps:
+      - description: 書くネタの置き場と下書きの運用を決める
+        done: true
+      - description: 月 1 本のペースを 3 ヶ月続ける
+        done: false
+      - description: 反響の大きかったテーマを勉強会の発表にする
+        done: false

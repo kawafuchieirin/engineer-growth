@@ -1,0 +1,21 @@
+# スキル熟練度の定義（単一の信頼できる情報源）
+# data/skills.yaml の level はこの定義を参照する。
+levels:
+  - level: 0
+    name: 未経験
+    description: 名前と用途を知っている程度。実際に触ったことはない。
+  - level: 1
+    name: 入門
+    description: チュートリアルや学習目的で触った。実務では他者の支援が必要。
+  - level: 2
+    name: 補助付き実務
+    description: レビューや相談を前提に実務タスクを完了できる。
+  - level: 3
+    name: 自走
+    description: 設計から実装・運用まで一人で完遂できる。典型的な障害に対処できる。
+  - level: 4
+    name: 牽引
+    description: チームの技術選定を主導し、他者をレビュー・育成できる。非自明な問題を解決できる。
+  - level: 5
+    name: 第一人者
+    description: 組織横断で基準を作る。社外発信や継続的な貢献で認知されている。

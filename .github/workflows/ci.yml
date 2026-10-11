@@ -1,0 +1,68 @@
+# 検証ワークフロー（型・テスト・データ整合性・ビルド）
+#
+# このリポジトリは data/*.yaml と blog/posts/*.md を単一の情報源とし、
+# dist/ と PROFILE.md を生成する。壊れた状態が main に入ると生成物まで
+# 壊れるため、push / PR のすべてでローカルと同じ検証（pnpm verify 相当）を回す。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # 原因切り分けのため手動実行も許可する
+  workflow_dispatch:
+
+# 同一ブランチで新しい push があれば古い実行は無駄なので止める。
+# （デプロイではなく検証なので中断しても副作用がない）
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# 既定の広い権限を使わず、必要な「読み取り」だけを明示する（最小権限）
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: 型・テスト・検証・ビルド
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v7
+        with:
+          # push しないジョブなので、資格情報を .git/config に残さない
+          # （後続のサードパーティ action から読めてしまうため）
+          persist-credentials: false
+
+      - name: mise で Node をセットアップ（.mise.toml の宣言に従う）
+        # ローカルと同じバージョン定義（node = "24"）を使うため
+        # setup-node ではなく mise-action を使う
+        # サードパーティ action は可変タグではなくコミット SHA で固定する。
+        # タグは作者が付け替えられるため、v5 のまま中身が差し替わると
+        # 書き込み権限を持つこのワークフローがそのコードを実行してしまう。
+        # SHA の更新は dependabot（github-actions エコシステム）が PR で提案する。
+        uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+
+      - name: pnpm をセットアップし、ストアをキャッシュ
+        # バージョンは package.json の packageManager から読み取られる
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: true
+
+      - name: 依存関係をインストール（ロックファイル固定）
+        # ロックファイルと package.json がずれていればここで失敗させる
+        run: pnpm install --frozen-lockfile
+
+      - name: 型チェック（tsc --noEmit）
+        run: pnpm typecheck
+
+      - name: ユニットテスト（vitest）
+        run: pnpm test
+
+      - name: データ検証（スキーマ + スキル ID の参照整合性）
+        run: pnpm validate
+
+      - name: サイトと PROFILE.md のビルド
+        run: pnpm build

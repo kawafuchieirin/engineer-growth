@@ -1,0 +1,130 @@
+# 目標（OKR）の単一の信頼できる情報源。
+# ここに書かれた値はすべて「書き方を示すためのサンプル」であり、実績ではない。
+# 自分用に使うときは horizon.vision と goals を自分の言葉で置き換えること。
+#
+# 書き方の指針は docs/GOALS_GUIDE.md を参照。
+#   - objective … 定性的な「どうなりたいか」。数字を入れない。
+#   - key_results … 測定可能な成果。metric / target / current で進捗が計算される。
+#   - why … なぜやるのかの判断軸。四半期途中の取捨選択はこれを根拠に行うので必須。
+
+horizon:
+  vision: |
+    クラウド基盤の設計から運用までを一人で完結でき、設計判断の理由をチームに説明して
+    再現できる状態にする。あわせて学びを継続的に外に出し、相談される側に回る。
+  updated: 2026-10-11
+
+goals:
+  - id: g-2026q4-iac
+    objective: 手順書に頼らず、インフラをコードから再現できる状態にする
+    quarter: 2026-Q4
+    status: in_progress
+    why: |
+      本番環境の変更が属人的な手作業に依存しており、担当者が不在だと誰も触れない。
+      コード化して差分がレビュー可能になることが、この先のどの改善よりも先に効く。
+    skills: [infra-terraform, cloud-aws, infra-cicd]
+    key_results:
+      - id: kr-modules
+        description: 共通利用できる Terraform モジュールを切り出して本番から参照する
+        metric: 本番環境が参照している自作モジュール数
+        target: 3
+        current: 1
+        unit: 個
+      - id: kr-drift
+        description: terraform plan の差分ゼロを週次で確認できる状態にする
+        metric: 差分ゼロを確認できた週の数
+        target: 8
+        current: 2
+        unit: 週
+      - id: kr-runbook
+        description: 手作業の手順書をコードまたは自動化に置き換える
+        metric: 廃止できた手順書
+        target: 5
+        current: 2
+        unit: 件
+
+  - id: g-2026q4-review
+    objective: レビューを「指摘」から「設計判断の共有」に変える
+    quarter: 2026-Q4
+    status: done
+    why: |
+      同じ指摘を毎回書いていた。観点を明文化すればレビューの時間を設計の議論に使えるし、
+      新しく入った人が自分で判断できるようになる。
+    skills: [prac-code-review, prac-design-patterns, soft-communication]
+    key_results:
+      - id: kr-guideline
+        description: レビュー観点をガイドラインとして文書化しチームで合意する
+        metric: 合意済みガイドライン
+        target: 1
+        current: 1
+        unit: 本
+      - id: kr-turnaround
+        description: レビュー待ち時間の中央値を 1 営業日以内にする
+        metric: 中央値 1 営業日以内を達成した週
+        target: 8
+        current: 9
+        unit: 週
+    retrospective: |
+      ガイドラインを作ったこと以上に、「なぜその指摘をするのか」を本文に書く習慣が効いた。
+      一方で観点が増えすぎてレビューが重くなったため、次の四半期で必須と推奨に分ける。
+
+  - id: g-2026q4-perf
+    objective: 計測に基づいてアプリケーションの遅さを説明できるようにする
+    quarter: 2026-Q4
+    status: dropped
+    why: |
+      体感の遅さを推測で語っていたため、改善の優先順位が付けられなかった。
+      ただし四半期途中でインフラのコード化（g-2026q4-iac）が先だと判断した。
+    skills: [prac-performance, infra-observability]
+    key_results:
+      - id: kr-profile
+        description: 主要エンドポイントのプロファイルを取得して遅い箇所を特定する
+        metric: プロファイル取得済みエンドポイント
+        target: 5
+        current: 1
+        unit: 本
+    retrospective: |
+      計測環境の準備に想定の 3 倍かかり、他の目標を圧迫したため中断した。
+      観測基盤（m-slo-observability）が整ってから再挑戦する方が安い、という判断。
+
+  - id: g-2027q1-k8s
+    objective: Kubernetes 上のワークロードを自分が一次対応できる状態にする
+    quarter: 2027-Q1
+    status: not_started
+    why: |
+      移行の意思決定は済んでいるが、障害時に頼れる人が一人しかいない。
+      自分が二人目になることがチームの可用性に直結する。
+    skills: [infra-kubernetes, infra-docker, infra-observability]
+    key_results:
+      - id: kr-deploy
+        description: ステージングのワークロードを自力でデプロイ・ロールバックする
+        metric: 自力で完了したデプロイ・ロールバック
+        target: 10
+        current: 0
+        unit: 回
+      - id: kr-drill
+        description: 障害訓練でノード障害・Pod 異常のシナリオに一次対応する
+        metric: 一次対応できたシナリオ
+        target: 4
+        current: 0
+        unit: 件
+
+  - id: g-2027q1-output
+    objective: 学んだことを外に出すことを習慣にする
+    quarter: 2027-Q1
+    status: not_started
+    why: |
+      書くと理解の穴が見つかる。発信は他者貢献である前に、自分の理解の検証手段である。
+    skills: [soft-writing, soft-mentoring]
+    key_results:
+      - id: kr-posts
+        description: 技術記事を公開する
+        metric: 公開記事数
+        target: 6
+        current: 0
+        unit: 本
+      - id: kr-talk
+        description: 社内勉強会で設計判断の話を発表する
+        metric: 発表回数
+        target: 2
+        current: 0
+        unit: 回
