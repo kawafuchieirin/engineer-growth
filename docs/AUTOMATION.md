@@ -12,6 +12,7 @@
 | `.github/workflows/ci.yml` | 型チェック・テスト・データ検証・ビルドの検証 | `push`(main) / `pull_request` / 手動 | `contents: read` |
 | `.github/workflows/pages.yml` | `dist/` を GitHub Pages に公開 | `push`(main の `data/** blog/** src/** assets/**`) / 手動 | build: `contents: read`<br>deploy: `pages: write`, `id-token: write` |
 | `.github/workflows/profile.yml` | `PROFILE.md` を再生成してコミット | `push`(main の `data/** blog/**`) / 週次 `0 23 * * 0` / 手動 | `contents: write` |
+| `.github/workflows/snapshot.yml` | 成長の記録を `data/history.yaml` に追加し、レベルアップ時にお祝い Issue を作成 | `push`(main の `data/** blog/**`、ただし `data/history.yaml` は除く) / 週次 `0 12 * * 0` / 手動 | `contents: write`<br>`issues: write` |
 | `.github/workflows/growth-review.yml` | 四半期の振り返り Issue を作成 | 四半期初日 `0 0 1 1,4,7,10 *` / 手動 | `issues: write` |
 
 いずれもワークフロー全体とジョブの両方で `permissions` を明示している（最小権限）。
@@ -25,6 +26,7 @@
 | ワークフロー | cron (UTC) | JST | 意図 |
 |---|---|---|---|
 | `profile.yml` | `0 23 * * 0` | 毎週**月曜 08:00**（日曜 23:00 UTC + 9h = 月曜 08:00） | 週の頭にプロフィールを最新化する |
+| `snapshot.yml` | `0 12 * * 0` | 毎週**日曜 21:00**（日曜 12:00 UTC + 9h = 同日 21:00） | 週の終わりに「今週伸びたこと」を記録する |
 | `growth-review.yml` | `0 0 1 1,4,7,10 *` | 1/4/7/10 月の **1 日 09:00**（0:00 UTC + 9h = 同日 09:00） | 四半期の頭に振り返りを促す |
 
 `growth-review.yml` は本来「第1営業日」に出したいが、cron に営業日・祝日の概念がないため
@@ -46,6 +48,71 @@
 また、差分が無ければコミットしない（`git status --porcelain -- PROFILE.md` で判定）ので、
 空コミットが積み上がることもない。
 
+### 無限ループ対策（`snapshot.yml`）
+
+`snapshot.yml` は `data/**` の push で起動し、自分で `data/history.yaml` を push する。
+そのままでは自分の push が自分を起動し続けるため、`profile.yml` と同じ三重の歯止めに
+**自分の出力をパスフィルタから除外する**対策を加えている。
+
+1. **パスフィルタの除外** — `paths` に `data/**` と `blog/**` を並べたうえで、
+   `!data/history.yaml` を置く。`paths` のパターンは上から順に評価され、
+   **最後に一致したパターン**が結果を決める（`!` を使う場合は `!` なしのパターンが
+   1 つ以上必要）。変更ファイルがすべて除外パターンに一致する push では起動しないため、
+   `data/history.yaml` だけを変更した自分のコミットでは再発火しない。
+2. **`[skip ci]`** — コミット本文に付与し、`data/history.yaml` を除外していない
+   `ci.yml` と `profile.yml` も再実行させない。
+3. **`GITHUB_TOKEN` の仕様** — 既定のトークンによる push はワークフローを再発火しない。
+4. **差分が無ければコミットしない** — `git status --porcelain -- data/history.yaml` で判定する。
+   上の 3 つをすり抜けたとしても、2 周目は同じ記録になって差分が出ないので必ず止まる。
+
+`[skip ci]` が付くため、記録のコミットでは `profile.yml` が走らない。
+`PROFILE.md` の「成長」節は、次の `data/` 更新か `profile.yml` の週次実行で追従する。
+
+## 成長の記録（スナップショット）
+
+`data/*.yaml` と `blog/posts/` が表すのは常に「今」の状態なので、**履歴がないと
+「伸びた」が見えない**。現在のレベルや XP は出せても、「前回からどれだけ進んだか」は
+原理的に計算できない。そこで `snapshot.yml` が `pnpm growth snapshot` を定期実行し、
+XP・レベル・スキル平均などを `data/history.yaml` に 1 行ずつ積む。
+`docs/GAME_DESIGN.md` の「成長の差分」と「連続棚卸し四半期数」はこの履歴を読む。
+
+**週次（日曜 21:00 JST）にしている理由**は、記録の粒度を振り返りの単位に合わせるため。
+日次だと変化のない行が増えて差分が読みにくく、月次だと「今週何が伸びたか」には粗い。
+週の終わりに 1 行を残す形は、連続投稿週数（週は月曜始まり）とも単位が揃う。
+あわせて `data/**` と `blog/**` の push でも記録するので、データを更新した日は
+週次を待たずに履歴が増える。同じ日付の記録は上書きされるため、1 日に何度走っても
+行は重複しない。
+
+### 手動で記録する
+
+```sh
+pnpm growth snapshot            # 今日の記録を data/history.yaml に追記（同じ日付なら上書き）
+pnpm growth snapshot --dry-run  # 書き込まずに内容だけ確認する
+```
+
+手動で記録したときは `data/history.yaml` をそのままコミットしてよい
+（ワークフローと同じ `chore: 成長の記録を追加` を使う）。
+ワークフローは同じ日付の行を上書きするだけなので、二重に記録されることはない。
+
+### `level-up` ラベルを用意する
+
+記録の前後でレベルが上がると、`snapshot.yml` が新しいレベルをタイトルに含む
+お祝い Issue を `level-up` ラベル付きで作成する。
+ラベルが無ければワークフローが自分で作成し、作成に失敗しても Issue 作成は続行する
+（`core.warning` を出すだけ）。手で先に作るなら次のいずれか。
+
+- 画面から: **Issues** → **Labels** → **New label** → 名前 `level-up`、色 `#fbca04`
+- CLI から:
+
+  ```sh
+  gh label create level-up --color fbca04 --description "プレイヤーレベルの到達記録"
+  ```
+
+同じレベルの Issue が**閉じたものを含めて**既にあれば作成しない（再実行や、データ修正で
+レベルが下がって再び上がったときに同じ祝いが並ばないようにするため）。
+レベルが下がった場合は Issue を作らず、ログに残すだけにする
+（データを直してレベルが落ちることはありうるので、失敗扱いにはしない）。
+
 ## 初期設定（GitHub の画面で一度だけ行う作業）
 
 ### 1. GitHub Pages を有効化する
@@ -66,7 +133,7 @@
    （この設定は「上限」ではなく「既定値」で、`permissions` キーで引き上げられる）
 
 `main` にブランチ保護を掛ける場合は、`github-actions[bot]` の push を許可するか、
-`profile.yml` の push 先を別ブランチ＋PR 運用に変える必要がある。
+`profile.yml` と `snapshot.yml` の push 先を別ブランチ＋PR 運用に変える必要がある。
 
 ### 3. `growth-review` ラベルを用意する
 
@@ -80,8 +147,9 @@
   gh label create growth-review --color 0e8a16 --description "四半期の振り返りと目標策定"
   ```
 
-Issue テンプレートが使う `skill` / `goal` / `blog` ラベルと、Dependabot が使う
-`dependencies` / `github-actions` ラベルも同様に、無ければ自動作成される。
+Issue テンプレートが使う `skill` / `goal` / `blog` ラベル、`snapshot.yml` が使う
+`level-up` ラベル（→「成長の記録」）、Dependabot が使う `dependencies` /
+`github-actions` ラベルも同様に、無ければ自動作成される。
 
 ### 4. Dependabot
 
@@ -139,6 +207,7 @@ pnpm build                      # dist/ と PROFILE.md を生成
 | ユニットテスト | 振る舞いの退行 | `pnpm test` で失敗テストを特定する |
 | データ検証 | `data/*.yaml` のスキーマ違反、スキル ID の参照切れ | エラーに出た ID を `data/skills.yaml` と照合する。既存 ID の改名・削除は参照を壊す |
 | サイトと PROFILE.md のビルド | レンダラ側の例外 | 検証が通ってビルドだけ落ちる場合は `src/render/` を疑う |
+| 成長のスナップショットを記録 | 集計の例外、`data/history.yaml` の破損 | `pnpm growth snapshot --dry-run` で再現する。既存の履歴が壊れている場合は `data/history.yaml` を直す |
 | mise で Node をセットアップ | `.mise.toml` の記述、ネットワーク | ローカルで `mise install` が通るか確認する |
 
 ワークフロー別の典型的な失敗。
@@ -149,6 +218,11 @@ pnpm build                      # dist/ と PROFILE.md を生成
   残る原因はブランチ保護かリポジトリ設定。上記「2. Actions の書き込み権限」を確認する。
 - **`profile.yml` が「差分はありません」で終わる** — 正常。`data/` の変更が
   `PROFILE.md` の出力に影響しなかっただけ。
+- **`snapshot.yml` が「差分はありません」で終わる** — 正常。同じ日付の記録が既にあり、
+  XP もレベルも変わっていないだけ（記録は上書きなので行は増えない）。
+- **レベルアップ Issue が作られない** — 同じレベルの Issue（タイトルに
+  `レベル N に到達` を含むもの）が**閉じたものを含めて**あるとスキップする仕様。
+  レベルが変わらなかった場合と下がった場合も作らない（ログに残るだけ）。
 - **振り返り Issue が作られない** — 同じ四半期の **未クローズ** Issue
   （タイトルに `[YYYY-QN]` を含むもの）があるとスキップする仕様。
   作り直したいときは既存 Issue を閉じてから手動実行する。
