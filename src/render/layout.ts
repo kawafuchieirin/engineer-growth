@@ -13,13 +13,14 @@ export interface LayoutOptions {
   /** サイトルートへの相対プレフィックス（例: サブディレクトリなら '../'）。 */
   base?: string;
   /** 現在のページを示すナビゲーションのキー。 */
-  active?: 'index' | 'skills' | 'goals' | 'roadmap' | 'blog';
+  active?: 'index' | 'game' | 'skills' | 'goals' | 'roadmap' | 'blog';
   body: string;
   generatedAt: string;
 }
 
 const NAV: ReadonlyArray<{ key: NonNullable<LayoutOptions['active']>; href: string; label: string }> = [
   { key: 'index', href: 'index.html', label: 'ダッシュボード' },
+  { key: 'game', href: 'game.html', label: '成長' },
   { key: 'skills', href: 'skills.html', label: 'スキル' },
   { key: 'goals', href: 'goals.html', label: '目標' },
   { key: 'roadmap', href: 'roadmap.html', label: 'ロードマップ' },
