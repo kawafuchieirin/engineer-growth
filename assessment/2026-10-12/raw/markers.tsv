@@ -1,0 +1,80 @@
+repo	marker	count	means
+gcp-cert-master	tf:resource 定義	51	Terraform のリソース定義数
+gcp-cert-master	tf:module 呼び出し	7	モジュールを呼んでいる箇所
+gcp-cert-master	tf:for_each	1	繰り返しでリソースを作っている
+gcp-cert-master	tf:validation	5	変数に入力検証を書いている
+gcp-cert-master	tf:lifecycle	3	削除保護などの制御
+gcp-cert-master	tf:バージョン固定	2	Terraform 本体のバージョン固定
+gcp-cert-master	tf:条件付きリソース	3	任意リソース化
+gcp-cert-master	gha:ワークフロー	5	ワークフローの数
+gcp-cert-master	gha:permissions 明示	7	権限を明示している箇所
+gcp-cert-master	gha:concurrency	5	同時実行を制御している箇所
+gcp-cert-master	gha:OIDC	4	長期キーを使わない認証
+gcp-cert-master	gha:タグ参照	19	action をタグ参照（固定されていない）
+gcp-cert-master	sh:strict mode	1	エラーで止まる設定
+gcp-cert-master	ts:strict	1	TypeScript の strict
+gcp-cert-master	ts:noUncheckedIndexedAccess	1	配列アクセスの型を厳しくしている
+life-repo	tf:resource 定義	40	Terraform のリソース定義数
+life-repo	tf:for_each	10	繰り返しでリソースを作っている
+life-repo	tf:dynamic ブロック	3	ブロックを動的に生成している
+life-repo	tf:moved ブロック	1	リソースを再作成せず移行した
+life-repo	tf:validation	1	変数に入力検証を書いている
+life-repo	tf:lifecycle	1	削除保護などの制御
+life-repo	tf:write-only 属性	3	シークレットを state に載せない
+life-repo	tf:バージョン固定	2	Terraform 本体のバージョン固定
+life-repo	gha:ワークフロー	1	ワークフローの数
+life-repo	gha:permissions 明示	1	権限を明示している箇所
+life-repo	gha:concurrency	1	同時実行を制御している箇所
+life-repo	gha:SHA ピン	1	action をコミット SHA で固定
+life-repo	gha:timeout	1	暴走を止める設定
+life-repo	sh:strict mode	1	エラーで止まる設定
+life-repo	ts:strict	3	TypeScript の strict
+life-repo	ts:noUncheckedIndexedAccess	3	配列アクセスの型を厳しくしている
+life-repo	ts:zod 検証	11	外部入力をスキーマ検証している
+task-manager	go:errors.Is-As	75	エラーを型で判定している
+task-manager	go:%w ラップ	78	エラーに文脈を足して包んでいる
+task-manager	go:sentinel error	8	判定用のエラー値を定義している
+task-manager	go:context 引数	60	context を引数で引き回している
+task-manager	go:goroutine	3	並行処理を書いた箇所
+task-manager	go:テーブル駆動テスト	34	テーブル駆動テスト
+task-manager	go:サブテスト	24	サブテストに分けている
+task-manager	go:トランザクション	7	明示的なトランザクション
+task-manager	go:go-embed	4	バイナリへの埋め込み
+task-manager	gha:ワークフロー	2	ワークフローの数
+task-manager	gha:permissions 明示	2	権限を明示している箇所
+task-manager	gha:concurrency	2	同時実行を制御している箇所
+task-manager	gha:タグ参照	3	action をタグ参照（固定されていない）
+task-manager	gha:timeout	2	暴走を止める設定
+task-manager	sh:strict mode	1	エラーで止まる設定
+task-manager	sh:関数分割	14	関数に分割している
+terminal-manager	gha:ワークフロー	1	ワークフローの数
+terminal-manager	gha:permissions 明示	1	権限を明示している箇所
+terminal-manager	gha:concurrency	1	同時実行を制御している箇所
+terminal-manager	gha:タグ参照	1	action をタグ参照（固定されていない）
+terminal-manager	sh:strict mode	3	エラーで止まる設定
+terminal-manager	sh:関数分割	27	関数に分割している
+terminal-manager	sh:dry-run	11	副作用なしで試せる設計
+terminal-manager	sec:gitleaks	3	コミット前のシークレット検出
+terminal-manager	sec:秘密鍵検出	1	秘密鍵の混入防止
+terminal-manager	sec:shellcheck	3	シェルスクリプトの静的検査
+regular-study	gha:ワークフロー	3	ワークフローの数
+regular-study	gha:permissions 明示	3	権限を明示している箇所
+regular-study	gha:タグ参照	7	action をタグ参照（固定されていない）
+regular-study	sh:strict mode	5	エラーで止まる設定
+regular-study	sec:gitleaks	3	コミット前のシークレット検出
+aws-exam	gha:ワークフロー	1	ワークフローの数
+aws-exam	gha:permissions 明示	1	権限を明示している箇所
+aws-exam	gha:concurrency	1	同時実行を制御している箇所
+aws-exam	gha:OIDC	2	長期キーを使わない認証
+aws-exam	gha:タグ参照	3	action をタグ参照（固定されていない）
+dev-garden	gha:ワークフロー	4	ワークフローの数
+dev-garden	gha:permissions 明示	8	権限を明示している箇所
+dev-garden	gha:concurrency	2	同時実行を制御している箇所
+dev-garden	gha:タグ参照	11	action をタグ参照（固定されていない）
+dev-garden	gha:timeout	7	暴走を止める設定
+dev-garden	sh:strict mode	1	エラーで止まる設定
+book-to-action	gha:ワークフロー	1	ワークフローの数
+book-to-action	gha:permissions 明示	1	権限を明示している箇所
+book-to-action	gha:タグ参照	1	action をタグ参照（固定されていない）
+book-to-action	sh:strict mode	6	エラーで止まる設定
+book-to-action	sh:関数分割	17	関数に分割している
