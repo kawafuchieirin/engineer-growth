@@ -1,0 +1,25 @@
+check	hits	found_in	means
+Dockerfile	5	regular-study:5	コンテナイメージの定義
+docker:マルチステージ	0	-	イメージを小さくする書き方
+docker:非 root 実行	0	-	root を避ける設定
+docker:HEALTHCHECK	0	-	コンテナの死活監視
+docker:compose	3	regular-study:3	複数コンテナの構成
+k8s:マニフェスト	0	-	Kubernetes の定義
+k8s:Helm	0	-	Helm チャート
+k8s:kustomize	0	-	kustomize 構成
+aws:VPC	0	-	ネットワークを自分で設計している
+aws:ECS-EKS	0	-	コンテナ基盤
+aws:RDS	0	-	マネージド RDBMS
+aws:X-Ray	0	-	分散トレーシング
+gcp:provider	0	-	Google Cloud のリソース定義
+rdbms:ドライバ	0	-	PostgreSQL / MySQL への接続
+perf:Go ベンチマーク	0	-	ベンチマーク
+perf:pprof	0	-	プロファイリング
+perf:k6	3	regular-study:3	負荷試験
+obs:Prometheus	0	-	メトリクス基盤
+obs:OpenTelemetry	0	-	分散トレーシング
+test:E2E	0	-	ブラウザの E2E テスト
+test:カバレッジ	0	-	カバレッジ計測
+sec:IaC スキャナ	0	-	IaC のセキュリティ検査
+sec:govulncheck	0	-	依存の脆弱性検査
+iac:複数環境	0	-	環境の分離

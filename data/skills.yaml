@@ -3,6 +3,10 @@
 # ■ このファイルの level / evidence は、2026-10-12 時点で公開リポジトリに
 #   残っている痕跡だけを根拠に付けた。根拠は evidence に具体的なファイルや
 #   実装内容として書いてあるので、納得できない行は自分で上書きすること。
+# ■ レベルを何の測定値で決めたかは assessment/2026-10-12/ に残した。
+#   - SKILL_BASIS.md … スキルごとの根拠と、上げるために欠けているもの
+#   - raw/*.tsv       … 測定値そのもの
+#   - measure.sh      … 同じ数字を再現するスクリプト
 # ■ 判定の前提と限界は docs/ASSESSMENT.md にまとめた。特に重要な前提は 2 つ。
 #   - 業務での経験は GitHub から見えないため、一切反映していない。
 #   - コミットの多くが AI 協働（Co-Authored-By）なので、自力で書いた度合いは
@@ -188,7 +192,7 @@ skills:
     last_used: 2026-10
     evidence:
       - task-manager を 6 モジュール・約 1 万行で設計し、API と画面を別プロセスに分離した
-      - errors.Is / errors.As を 73 箇所、%w ラップを 78 箇所で使い、sentinel error と独自エラー型を使い分けている
+      - errors.Is / errors.As を 75 箇所、%w ラップを 78 箇所で使い、sentinel error と独自エラー型を使い分けている
       - 層をまたぐときに sql.ErrNoRows をドメインのエラーへ変換している
       - ORM を使わず database/sql を直接扱い、go:embed で自作マイグレータを実装
       - SQLite の挙動を理解した DSN 設計（WAL・busy_timeout・_txlock=immediate に理由コメント）
