@@ -3,14 +3,14 @@
 snapshots:
   - date: 2026-10-12
     xp:
-      skills: 1520
+      skills: 1560
       goals: 0
       roadmap: 15
       blog: 0
       achievements: 50
-      total: 1585
+      total: 1625
     level: 7
-    skillAverage: 2.27
+    skillAverage: 2.33
     skillCount: 33
     posts: 0
     milestonesDone: 0
