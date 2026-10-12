@@ -1,27 +1,20 @@
 # 成長の記録。pnpm growth snapshot で追記する（append-only）。
 # このファイルは手で書き足さない。過去を書き換えると「伸びた」が嘘になる。
 snapshots:
-  - date: 2026-10-11
+  - date: 2026-10-12
     xp:
-      skills: 1620
-      goals: 164
-      roadmap: 185
-      blog: 100
-      achievements: 330
-      total: 2399
-    level: 9
-    skillAverage: 2.65
-    skillCount: 26
-    posts: 2
-    milestonesDone: 1
-    goalsDone: 1
+      skills: 1520
+      goals: 0
+      roadmap: 15
+      blog: 0
+      achievements: 50
+      total: 1585
+    level: 7
+    skillAverage: 2.27
+    skillCount: 33
+    posts: 0
+    milestonesDone: 0
+    goalsDone: 0
     achievements:
       - evidence-ten
-      - first-goal-done
-      - first-milestone-done
-      - first-post
       - first-self-reliant-skill
-      - post-links-three-skills
-      - first-leading-skill
-      - no-untouched-skill
-      - retrospective-on-dropped

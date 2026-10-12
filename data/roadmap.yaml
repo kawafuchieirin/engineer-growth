@@ -1,176 +1,121 @@
 # ロードマップの単一の信頼できる情報源。
-# ここに書かれた値はすべて「書き方を示すためのサンプル」であり、実績ではない。
+#
+# ■ ここに書いてあるのは data/skills.yaml で見えた空白と、本人が文書に残した
+#   計画から引いた下書き。「やると決めた」ものではないので、要らないものは消すこと。
+# ■ steps の done は、終わったものだけ true にする。進捗はこの比率で出る。
 #
 # 書き方の指針は docs/ROADMAP_GUIDE.md を参照。
 #   - tracks     … 並行して伸ばす軸。3〜4 本に絞る（増やすと「全部やる」計画になる）。
 #   - milestones … 1〜3ヶ月で終わる塊。outcome に「何ができたら終わりか」を書く。
 #   - depends_on … 先に終わっていないと着手しても無駄になるものだけを書く。
 
-updated: 2026-10-11
+updated: 2026-10-12
 
 tracks:
-  - id: infra
-    name: インフラ / SRE
-  - id: design
-    name: 設計力 / コード品質
-  - id: data
-    name: データ / 分析基盤
+  - id: foundation
+    name: 土台（棚卸しと記録）
+  - id: cloud
+    name: クラウド / インフラの空白
   - id: output
-    name: 発信 / 育成
+    name: 発信
+  - id: hardening
+    name: 自分の環境の堅牢化
 
 milestones:
-  - id: m-review-guideline
-    title: レビュー観点ガイドラインの合意
-    track: design
-    status: done
-    start: 2026-10-01
-    due: 2026-10-31
-    skills: [prac-code-review, prac-design-patterns, soft-communication]
-    goals: [g-2026q4-review]
-    outcome: |
-      レビュー観点が文書化され、チーム全員が「この指摘は必須か推奨か」を見分けられる。
-      新規参加者が初回レビューを単独で出せる。
-    steps:
-      - description: 直近 3 ヶ月のレビューコメントを分類して頻出観点を洗い出す
-        done: true
-      - description: 必須・推奨の二段階でガイドラインを起草する
-        done: true
-      - description: チームレビューで合意し、PR テンプレートから参照する
-        done: true
-
-  - id: m-tf-module-split
-    title: Terraform の共通モジュール切り出し
-    track: infra
+  - id: m-skills-baseline
+    title: スキル棚卸しの基準値を確定する
+    track: foundation
     status: in_progress
-    start: 2026-10-01
+    start: 2026-10-12
+    due: 2026-10-31
+    skills: [soft-writing]
+    goals: [g-2026q4-skills-truth]
+    outcome: |
+      data/skills.yaml に「要確認」が 1 件も残っておらず、業務での経験も反映されている。
+      snapshot が 1 件以上記録され、次回実行で差分が出る状態になっている。
+    steps:
+      - description: 公開リポジトリの痕跡から初版を作る
+        done: true
+      - description: 業務経験（Linux・ネットワーク・チームでのレビュー）を反映する
+        done: false
+      - description: AWS 認定の取得状況を確定し、根拠として書く
+        done: false
+      - description: snapshot を実行して基準値を記録する
+        done: false
+
+  - id: m-first-post
+    title: 最初の技術記事を公開する
+    track: output
+    status: planned
+    start: 2026-10-20
     due: 2026-11-30
-    skills: [infra-terraform, cloud-aws]
-    goals: [g-2026q4-iac]
+    skills: [soft-writing, prac-troubleshooting]
+    goals: [g-2026q4-output]
     outcome: |
-      VPC・RDS・ECS の構成がモジュール経由で記述され、本番とステージングが
-      同じモジュールの異なる変数で表現されている。plan の差分がゼロで安定する。
+      記事が 1 本公開され、ネタ出しから公開までの流れが自分の中で一度回っている。
+      題材は作ったものではなく「詰まって解いた過程」で、再現手順まで書かれている。
     steps:
-      - description: 既存リソースを import して現状をコードに写し取る
-        done: true
-      - description: 環境差分を変数に切り出し、VPC モジュールを作る
-        done: true
-      - description: RDS / ECS モジュールを作り本番から参照する
+      - description: 題材を選ぶ（自動リリースの区切り文字の件が最有力）
         done: false
-      - description: plan 差分ゼロを 2 週連続で確認する
+      - description: 下書きを blog/drafts に書く
         done: false
+      - description: 公開して PROFILE.md に反映されることを確認する
+        done: false
+    depends_on: [m-skills-baseline]
 
-  - id: m-api-contract
-    title: API 契約の明文化とスキーマ駆動テスト
-    track: design
-    status: blocked
+  - id: m-sha-pin
+    title: Actions のサプライチェーン対策を全リポジトリに広げる
+    track: hardening
+    status: planned
     start: 2026-11-01
-    due: 2026-12-31
-    skills: [be-api-design, be-testing, lang-typescript]
+    due: 2026-11-30
+    skills: [prac-security, infra-cicd]
     outcome: |
-      主要エンドポイントの入出力が OpenAPI として定義され、その定義から生成した
-      テストが CI で動く。クライアント側の実装が定義だけを見て進められる。
-    blocked_reason: 認証方式の刷新が別チームで進行中で、エンドポイント構成が確定していない
-    depends_on: [m-review-guideline]
+      書き込み権限を持つワークフローのサードパーティ action が、すべてコミット SHA で
+      固定されている。dependabot が SHA の更新を PR で提案する状態になっている。
     steps:
-      - description: 既存エンドポイントの入出力を棚卸しする
-        done: true
-      - description: OpenAPI 定義を書き、レビューで合意する
+      - description: 書き込み権限を持つワークフローを全リポジトリから洗い出す
         done: false
-      - description: 定義からの契約テストを CI に組み込む
+      - description: サードパーティ action を SHA に固定する
+        done: false
+      - description: dependabot の github-actions エコシステムを有効にする
         done: false
 
-  - id: m-ci-iac-pipeline
-    title: IaC の CI/CD パイプライン整備
-    track: infra
+  - id: m-container-prod
+    title: コンテナを「教材」から「動かしているもの」にする
+    track: cloud
     status: planned
     start: 2026-12-01
     due: 2027-01-31
-    skills: [infra-cicd, infra-terraform, lang-bash]
-    goals: [g-2026q4-iac]
+    skills: [infra-docker, cloud-aws]
     outcome: |
-      PR で plan が自動投稿され、main へのマージで apply される。
-      手元から apply する運用が廃止され、変更履歴が PR に残る。
-    depends_on: [m-tf-module-split]
+      自分のサービスのいずれかがコンテナとしてクラウド上で動いており、
+      イメージのビルドとデプロイが CI から自動で行われている。
+      マルチステージビルドと非 root 実行ができている。
     steps:
-      - description: plan を PR にコメントするワークフローを作る
+      - description: 対象を決める（task-manager の API が候補）
         done: false
-      - description: apply 用の権限を最小権限の IAM ロールに分離する
+      - description: マルチステージ・非 root の Dockerfile に書き直す
         done: false
-      - description: 手元 apply を禁止し、手順書を更新する
+      - description: レジストリへの push とデプロイを CI に組む
         done: false
 
-  - id: m-etl-metrics
-    title: 開発指標の収集パイプライン
-    track: data
-    status: planned
-    start: 2027-01-01
-    due: 2027-03-31
-    skills: [data-etl, data-sql, lang-python]
-    outcome: |
-      リードタイム・変更失敗率が週次で自動集計され、ダッシュボードから参照できる。
-      改善の議論が体感ではなく数字から始められる。
-    steps:
-      - description: 収集したい指標とその定義を決める
-        done: false
-      - description: リポジトリ・CI から日次で取り込む ETL を書く
-        done: false
-      - description: 週次集計クエリとダッシュボードを用意する
-        done: false
-
-  - id: m-k8s-prod
-    title: Kubernetes 本番ワークロードの一次対応
-    track: infra
+  - id: m-network-hands-on
+    title: ネットワークを知識から構築経験に変える
+    track: cloud
     status: planned
     start: 2027-02-01
-    due: 2027-04-30
-    skills: [infra-kubernetes, infra-docker, infra-linux]
-    goals: [g-2027q1-k8s]
+    due: 2027-03-31
+    skills: [infra-network, infra-terraform]
     outcome: |
-      本番の Pod 異常・ノード障害に対して、手順を見ながらでなく自分の判断で
-      一次対応できる。対応記録がポストモーテムとして残っている。
-    depends_on: [m-ci-iac-pipeline]
+      VPC・サブネット・ルーティング・セキュリティグループを Terraform で構築し、
+      そこにプライベート接続のリソースを置いた構成が自分の手元に残っている。
+      ANS の学習ノートの内容を、動くコードとして説明できる。
     steps:
-      - description: クラスタ構成とマニフェストを読み解いて図にする
+      - description: VPC とサブネットを Terraform で構築する
         done: false
-      - description: ステージングでデプロイ・ロールバックを反復する
+      - description: プライベートサブネットのリソースへ到達する経路を作る
         done: false
-      - description: 障害訓練で一次対応を担当する
+      - description: 構成図と設計判断の理由を残す
         done: false
-
-  - id: m-slo-observability
-    title: SLO とアラートの再設計
-    track: infra
-    status: planned
-    start: 2027-05-01
-    due: 2027-07-31
-    skills: [infra-observability, prac-performance, infra-linux]
-    outcome: |
-      主要サービスに SLO が定義され、アラートが SLO 違反の予兆にのみ鳴る。
-      「鳴っても無視するアラート」がゼロになる。
-    depends_on: [m-k8s-prod]
-    steps:
-      - description: 現行アラートを棚卸しし、無視されているものを特定する
-        done: false
-      - description: ユーザー影響を基準に SLI / SLO を定義する
-        done: false
-      - description: バーンレートアラートに置き換える
-        done: false
-
-  - id: m-blog-cadence
-    title: 技術発信の習慣化
-    track: output
-    status: in_progress
-    start: 2026-10-01
-    due: 2027-09-30
-    skills: [soft-writing, soft-mentoring]
-    goals: [g-2027q1-output]
-    outcome: |
-      月 1 本以上の記事が 1 年間継続し、ネタ出しから公開までの流れが
-      自分の中で型になっている。社外から反応が来る記事が複数本ある。
-    steps:
-      - description: 書くネタの置き場と下書きの運用を決める
-        done: true
-      - description: 月 1 本のペースを 3 ヶ月続ける
-        done: false
-      - description: 反響の大きかったテーマを勉強会の発表にする
-        done: false
+    depends_on: [m-container-prod]
