@@ -20,7 +20,11 @@ set -euo pipefail
 
 OWNER=kawafuchieirin
 OUT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/raw"
-REPOS=(gcp-cert-master life-repo task-manager terminal-manager regular-study aws-exam dev-garden book-to-action)
+# RaiseTech_kadaiyou_repo を初版で除外したのは誤りだった。
+# GitHub の languages API が {} を返し HEAD も空に見えたため「空」と判定したが、
+# 実際には 71 コミットあり、CloudFormation で VPC・ALB・RDS を構築した履歴が残っていた。
+# ファイルが後のコミットで削除されているため、HEAD だけ見ると存在しない。
+REPOS=(gcp-cert-master life-repo task-manager terminal-manager regular-study aws-exam dev-garden book-to-action RaiseTech_kadaiyou_repo)
 
 mkdir -p "$OUT_DIR"
 
@@ -167,7 +171,11 @@ ABSENCE=(
   "k8s:マニフェスト"          '\.ya?ml$'                   '^kind: (Deployment|StatefulSet|DaemonSet|Service|Ingress)' "Kubernetes の定義"
   "k8s:Helm"                'Chart\.ya?ml$'              '^apiVersion:'                               "Helm チャート"
   "k8s:kustomize"           'kustomization\.ya?ml$'      '^resources:|^apiVersion:'                   "kustomize 構成"
-  "aws:VPC"                 '\.tf$'                      'resource "aws_(vpc|subnet|route_table|nat_gateway|security_group)"' "ネットワークを自分で設計している"
+  "aws:VPC(tf)"             '\.tf$'                      'resource "aws_(vpc|subnet|route_table|nat_gateway|security_group)"' "Terraform でネットワークを設計している"
+  "aws:VPC(cfn)"            '\.ya?ml$|\.json$'           'AWS::EC2::(VPC|Subnet|RouteTable|InternetGateway|NatGateway)' "CloudFormation でネットワークを設計している"
+  "aws:ALB(cfn)"            '\.ya?ml$|\.json$'           'AWS::ElasticLoadBalancingV2' "ロードバランサを構成している"
+  "aws:RDS(cfn)"            '\.ya?ml$|\.json$'           'AWS::RDS::' "マネージド RDBMS を構成している"
+  "iac:CloudFormation"      '\.ya?ml$|\.json$'           'AWSTemplateFormatVersion' "CloudFormation テンプレート"
   "aws:ECS-EKS"             '\.tf$'                      'resource "aws_(ecs|eks)_'                   "コンテナ基盤"
   "aws:RDS"                 '\.tf$'                      'resource "aws_(db_instance|rds_|elasticache)' "マネージド RDBMS"
   "aws:X-Ray"               '\.tf$'                      'xray|X-Ray'                                 "分散トレーシング"

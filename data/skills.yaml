@@ -157,12 +157,21 @@ skills:
   - id: infra-network
     name: ネットワーク
     category: infra
-    level: 1
+    level: 2
     target: 3
-    last_used: 2026-06
+    last_used: 2023-07
     evidence:
+      - CloudFormation でマルチ AZ の VPC を構築した（Public/Private サブネット各 2・ルートテーブル 2・Internet Gateway・セキュリティグループ）
+      - CIDR をパラメータ化し、アベイラビリティゾーンを !Select で取得してハードコードを避けた
+      - 同じ構成に ALB と RDS と EC2 を載せ、Ansible のコントロールノードも立てた
       - AWS Advanced Networking（ANS-C01）の学習でサービス別の要点ノートと、間隔反復つきの適応型クイズ TUI を自作した
-    notes: 構築の痕跡がない（作った構成はすべて VPC 不要のマネージド型）。知識としての学習のみ。業務経験があれば上書きすること＝要確認。
+    notes: |
+      初版で level 1「構築の痕跡がない」としたのは測定の誤りだった。2023-07 までの
+      RaiseTech の課題リポジトリに CloudFormation の実物が残っている（ファイルは後に
+      削除されたため HEAD には無く、git 履歴にのみ存在する）。
+      ただしスクールの課題として手本に沿って作ったものであり、3 年以上触っていない。
+      設計を自分で起こした経験と運用の経験は無いため 2 に留める。
+      業務で日常的に扱っているなら上書きすること＝要確認。
 
   - id: infra-kubernetes
     name: Kubernetes
@@ -176,12 +185,17 @@ skills:
   - id: infra-linux
     name: Linux / サーバー運用
     category: infra
-    level: 1
+    level: 2
     target: 3
     last_used: 2026-10
     evidence:
+      - CloudFormation で EC2 インスタンスを構築し、Ansible のコントロールノードを立てた（2023）
       - macOS 上のターミナル環境を Git 管理し、setup.sh 一発で再現できる状態にしている
-    notes: サーバーの構築・運用・障害対応の痕跡が公開リポジトリに無い。インフラエンジニアの業務で日常的に触っているなら実態に合わせて上げること＝要確認。
+      - 冪等なシェルスクリプト（set -euo pipefail・バックアップ復元・--dry-run）で環境構築を自動化している
+    notes: |
+      初版で level 1 としたが、2023 年の課題リポジトリに EC2 と Ansible の痕跡があったため 2 に修正。
+      ただしサーバーの運用・障害対応・オンコールの痕跡は公開リポジトリに無い。
+      インフラエンジニアの業務で日常的に触っているなら実態に合わせて上げること＝要確認。
 
   # ---- languages ----
   - id: lang-go
@@ -382,7 +396,11 @@ skills:
       - DynamoDB の単一テーブル設計（pk/sk・PITR・SSE・削除保護）で、Scan を避けるための索引を設計している
       - SQLite で CHECK 制約と部分ユニークインデックスを使い、「計測中タイマーは全体で 1 つ」という不変条件を DB 側で保証した
       - BeginTx と defer Rollback のパターンでトランザクションを扱っている
-    notes: RDBMS（PostgreSQL / MySQL）の設計・運用・チューニング、マイグレーション運用、N+1 やインデックスの改善経験はない。
+      - CloudFormation で RDS を構築した（2023。スクールの課題として手本に沿って作ったもの）
+    notes: |
+      初版で「RDBMS の経験なし」と書いたのは不正確だった。2023 年に CloudFormation で
+      RDS を構築した痕跡がある。ただし作ったのはプロビジョニングのみで、スキーマ設計・
+      チューニング・マイグレーション運用・N+1 の改善といった経験は無いため level は 2 に留める。
 
   - id: be-auth
     name: 認証 / 認可

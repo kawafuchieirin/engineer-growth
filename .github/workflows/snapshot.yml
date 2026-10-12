@@ -35,18 +35,20 @@ concurrency:
   group: snapshot
   cancel-in-progress: false
 
+# トップレベルは読み取りのみ。書き込みは必要なジョブだけに付ける。
+# トップレベルに write を置くと全ジョブが書き込み権限を持ち、最小権限にならない
+# （OpenSSF Scorecard の Token-Permissions がこれを検出して 0/10 になっていた）。
 permissions:
-  # data/history.yaml をコミットして push するため
-  contents: write
-  # レベルアップ時にお祝い Issue を作成するため
-  issues: write
+  contents: read
 
 jobs:
   record-snapshot:
     name: 成長の記録を追加し、レベルアップを祝う
     runs-on: ubuntu-latest
     permissions:
+      # data/history.yaml をコミットして push するため
       contents: write
+      # レベルアップ時にお祝い Issue を作成するため
       issues: write
     env:
       # data/history.yaml の「最後のスナップショットの level」だけを出力する小さな
