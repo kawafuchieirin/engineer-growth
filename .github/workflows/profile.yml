@@ -28,15 +28,19 @@ concurrency:
   group: profile
   cancel-in-progress: false
 
+# トップレベルは読み取りのみ。書き込みは必要なジョブだけに付ける。
+# トップレベルに write を置くと、ワークフロー内の全ジョブが書き込み権限を
+# 持つことになり、最小権限にならない（OpenSSF Scorecard の
+# Token-Permissions がこれを検出して 0/10 になっていた）。
 permissions:
-  # PROFILE.md をコミットして push するために書き込みが必要
-  contents: write
+  contents: read
 
 jobs:
   update-profile:
     name: PROFILE.md を再生成してコミット
     runs-on: ubuntu-latest
     permissions:
+      # PROFILE.md をコミットして push するために、このジョブだけ書き込みを持つ
       contents: write
     steps:
       - name: リポジトリをチェックアウト

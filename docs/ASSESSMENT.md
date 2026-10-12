@@ -27,6 +27,7 @@ GitHub に残っている痕跡だけ**を根拠に付けた。自分で見直�
 | aws-exam | ANS-C01 / AIP / SCS の学習記録、バッジ生成 UI |
 | dev-garden / book-to-action | Issue フォームと Actions による自動化の設計 |
 | retrospectives/ | 原因究明の進め方（1 件） |
+| **RaiseTech_kadaiyou_repo** | **CloudFormation の VPC / ALB / RDS / EC2（git 履歴のみ）、Ansible、CircleCI** |
 | 各リポジトリの git log | コミット規約、粒度、AI 協働の比率 |
 
 ## レベルの付け方
@@ -63,6 +64,16 @@ GitHub に残っている痕跡だけ**を根拠に付けた。自分で見直�
 
 3. **公開リポジトリの外は見ていない。** private リポジトリ、業務のコード、
    社内のドキュメント、勉強会の実際の運営規模は対象外。
+
+4. **初版は HEAD しか見ておらず、対象の選び方も誤っていた（2026-10-12 に訂正）。**
+   `RaiseTech_kadaiyou_repo` を「空」と判定して除外したが、71 コミットあり、
+   CloudFormation で VPC・ALB・RDS・EC2 を構築した履歴が残っていた。
+   ファイルは後のコミットで削除されており、HEAD だけ見ると存在しない。
+   この結果 `infra-network` を 1、`be-database` の notes を「RDBMS の経験なし」と
+   誤って記録していた。`history.sh` を新設し、レベル 0-1 を付ける前に
+   git 履歴を検索する手順を加えた。
+
+   **教訓**: 「測定された不在」は、測る場所とパターンが正しいときだけ根拠になる。
 
 ## 自分で見直すときの手順
 

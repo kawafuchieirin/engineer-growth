@@ -7,7 +7,11 @@ docker:compose	3	regular-study:3	複数コンテナの構成
 k8s:マニフェスト	0	-	Kubernetes の定義
 k8s:Helm	0	-	Helm チャート
 k8s:kustomize	0	-	kustomize 構成
-aws:VPC	0	-	ネットワークを自分で設計している
+aws:VPC(tf)	0	-	Terraform でネットワークを設計している
+aws:VPC(cfn)	24	RaiseTech_kadaiyou_repo:24	CloudFormation でネットワークを設計している
+aws:ALB(cfn)	3	RaiseTech_kadaiyou_repo:3	ロードバランサを構成している
+aws:RDS(cfn)	2	RaiseTech_kadaiyou_repo:2	マネージド RDBMS を構成している
+iac:CloudFormation	6	RaiseTech_kadaiyou_repo:6	CloudFormation テンプレート
 aws:ECS-EKS	0	-	コンテナ基盤
 aws:RDS	0	-	マネージド RDBMS
 aws:X-Ray	0	-	分散トレーシング

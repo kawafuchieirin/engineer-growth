@@ -15,15 +15,16 @@ on:
   # 期の途中で作り直したいとき用
   workflow_dispatch:
 
+# トップレベルは読み取りのみ。書き込みは必要なジョブだけに付ける。
 permissions:
-  # Issue の作成とラベル付与にのみ書き込みが必要（contents は読まない）
-  issues: write
+  contents: read
 
 jobs:
   create-review-issue:
     name: 振り返り Issue を作成（重複時はスキップ）
     runs-on: ubuntu-latest
     permissions:
+      # Issue の作成とラベル付与にのみ書き込みが必要（contents は読まない）
       issues: write
     steps:
       - name: 四半期の振り返り Issue を作成
