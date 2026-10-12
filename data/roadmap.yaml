@@ -37,9 +37,9 @@ milestones:
       - description: 公開リポジトリの痕跡から初版を作る
         done: true
       - description: 業務経験（Linux・ネットワーク・チームでのレビュー）を反映する
-        done: false
+        done: true
       - description: AWS 認定の取得状況を確定し、根拠として書く
-        done: false
+        done: true
       - description: snapshot を実行して基準値を記録する
         done: false
 

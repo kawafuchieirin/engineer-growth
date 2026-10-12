@@ -33,9 +33,9 @@ goals:
     key_results:
       - id: kr-unverified
         description: notes に「要確認」と書いたスキルを、実態に合わせて確定させる
-        metric: 要確認のまま残っているスキル数
+        metric: 確定させたスキル数
         target: 8
-        current: 0
+        current: 8
         unit: 件
       - id: kr-baseline
         description: 確定後の値を snapshot で記録し、成長の起点を作る
