@@ -1,319 +1,462 @@
 # スキル棚卸し（単一の信頼できる情報源）
 #
-# ■ このファイルはシードデータです。level / target / experience_years /
-#   last_used / evidence はすべて「サンプル値」なので、必ず自分の実態に
-#   書き換えてください（owner.name も <あなたの名前> のままです）。
+# ■ このファイルの level / evidence は、2026-10-12 時点で公開リポジトリに
+#   残っている痕跡だけを根拠に付けた。根拠は evidence に具体的なファイルや
+#   実装内容として書いてあるので、納得できない行は自分で上書きすること。
+# ■ 判定の前提と限界は docs/ASSESSMENT.md にまとめた。特に重要な前提は 2 つ。
+#   - 業務での経験は GitHub から見えないため、一切反映していない。
+#   - コミットの多くが AI 協働（Co-Authored-By）なので、自力で書いた度合いは
+#     本人しか判定できない。レベルは「設計を説明でき、動くものを出せた」水準で付けた。
+# ■ notes に「要確認」と書いた行は、根拠が足りず仮で置いた値。
 # ■ level の意味は data/levels.yaml を参照（0-5）。
-# ■ skills[].id は目標・ロードマップ・ブログから参照されるため、
-#   追加は自由ですが既存 ID の改名・削除は参照整合性エラーになります。
 # ■ 記入方針・棚卸し手順は docs/SKILLS_GUIDE.md を参照。
 
 owner:
-  name: <あなたの名前>
-  role: バックエンド / SRE エンジニア
-  updated: 2026-10-11
+  name: かわふち
+  role: インフラエンジニア
+  updated: 2026-10-12
 
 categories:
   # weight は「自分のキャリアにおける重み」(0.1-2.0)。
   # レーダーチャートの軸順と重み付き平均に使う。合計を 1 に揃える必要はない。
+  - id: cloud
+    name: クラウド
+    weight: 1.5
+  - id: infra
+    name: インフラ / IaC / CI-CD
+    weight: 1.5
   - id: languages
     name: プログラミング言語
     weight: 1.2
-  - id: backend
-    name: バックエンド
-    weight: 1.3
-  - id: frontend
-    name: フロントエンド
-    weight: 0.6
-  - id: infra
-    name: インフラ / SRE
-    weight: 1.5
-  - id: cloud
-    name: クラウド
-    weight: 1.3
-  - id: data
-    name: データ
-    weight: 1.0
   - id: practice
     name: エンジニアリング実践
-    weight: 1.1
+    weight: 1.2
+  - id: backend
+    name: バックエンド
+    weight: 1.0
   - id: soft
-    name: ソフトスキル
-    weight: 0.9
+    name: 発信 / 育成
+    weight: 1.0
+  - id: frontend
+    name: フロントエンド
+    weight: 0.5
 
 skills:
-  # ---- languages ----
-  - id: lang-typescript
-    name: TypeScript
-    category: languages
-    level: 3
-    target: 4
-    experience_years: 3
-    last_used: 2026-10
-    evidence:
-      - 社内 CLI ツールを型安全な設計で単独実装・運用
-      - strict モード前提のコードレビューを担当
-    links:
-      - label: TypeScript 公式ハンドブック
-        url: https://www.typescriptlang.org/docs/handbook/intro.html
-    notes: 型レベルプログラミング（conditional types）はまだ手が止まる。
-
-  - id: lang-python
-    name: Python
-    category: languages
-    level: 3
-    target: 3
-    experience_years: 4
-    last_used: 2026-08
-    evidence:
-      - 運用自動化スクリプトとバッチ処理を本番で継続運用
-    notes: 非同期（asyncio）は補助が必要。
-
-  - id: lang-go
-    name: Go
-    category: languages
-    level: 1
-    target: 3
-    experience_years: 0.5
-    last_used: 2025-04
-    notes: サンプル値。学習目的で触った段階。goroutine の実務経験はない。
-
-  - id: lang-bash
-    name: Bash / シェルスクリプト
-    category: languages
-    level: 3
-    target: 3
-    experience_years: 5
-    last_used: 2026-10
-    evidence:
-      - デプロイ・バックアップ運用スクリプトを set -euo pipefail 前提で整備
-
-  # ---- backend ----
-  - id: be-api-design
-    name: API 設計 (REST / OpenAPI)
-    category: backend
-    level: 3
-    target: 4
-    experience_years: 3
-    last_used: 2026-09
-    evidence:
-      - 外部公開 API のバージョニング方針とエラー仕様を策定
-    links:
-      - label: OpenAPI Specification
-        url: https://spec.openapis.org/oas/latest.html
-
-  - id: be-rdb
-    name: RDB 設計 / チューニング
-    category: backend
-    level: 2
-    target: 4
-    experience_years: 3
-    last_used: 2026-09
-    notes: 正規化は設計できるが、実行計画を読んだ改善は相談しながら。
-
-  - id: be-testing
-    name: 自動テスト設計
-    category: backend
-    level: 3
-    target: 4
-    experience_years: 3
-    last_used: 2026-10
-    evidence:
-      - テストピラミッドを定義し CI のテスト実行時間を 1/3 に短縮
-
-  # ---- frontend ----
-  - id: fe-react
-    name: React
-    category: frontend
-    level: 2
-    target: 3
-    experience_years: 1.5
-    last_used: 2026-06
-    notes: 管理画面の実装経験のみ。状態管理の設計判断は未経験。
-
-  - id: fe-html-css
-    name: HTML / CSS
-    category: frontend
-    level: 3
-    target: 3
-    experience_years: 5
-    last_used: 2026-10
-    evidence:
-      - レスポンシブ・ダークモード対応の静的サイトを単独で構築
-
-  # ---- infra ----
-  - id: infra-docker
-    name: Docker / コンテナ
-    category: infra
-    level: 4
-    target: 4
-    experience_years: 4
-    last_used: 2026-10
-    evidence:
-      - マルチステージビルドでイメージサイズを 70% 削減
-      - チームの Dockerfile 規約を策定しレビュー担当
-
-  - id: infra-kubernetes
-    name: Kubernetes
-    category: infra
-    level: 2
-    target: 4
-    experience_years: 1
-    last_used: 2026-07
-    notes: マニフェスト修正と調査はできるが、クラスタ設計は未経験。
-
-  - id: infra-terraform
-    name: Terraform
-    category: infra
-    level: 3
-    target: 4
-    experience_years: 2
-    last_used: 2026-09
-    evidence:
-      - 本番環境の IaC をモジュール分割して単独で設計・運用
-    links:
-      - label: Terraform スタイル規約
-        url: https://developer.hashicorp.com/terraform/language/style
-
-  - id: infra-cicd
-    name: CI/CD パイプライン
-    category: infra
-    level: 4
-    target: 5
-    experience_years: 3
-    last_used: 2026-10
-    evidence:
-      - GitHub Actions による検証・ビルド・デプロイの自動化を主導
-      - デプロイ頻度を週 1 回から日次へ改善
-
-  - id: infra-observability
-    name: 可観測性 (メトリクス / ログ / トレース)
-    category: infra
-    level: 2
-    target: 4
-    experience_years: 1.5
-    last_used: 2026-09
-    notes: ダッシュボード追加はできる。SLO 設計とトレース導入は未経験。
-
-  - id: infra-linux
-    name: Linux 運用
-    category: infra
-    level: 3
-    target: 4
-    experience_years: 5
-    last_used: 2026-10
-    evidence:
-      - 本番サーバのリソース枯渇障害を一次切り分けから恒久対応まで担当
-
   # ---- cloud ----
   - id: cloud-aws
-    name: AWS
+    name: AWS（サーバーレス構成）
     category: cloud
     level: 3
     target: 4
-    experience_years: 3
     last_used: 2026-10
     evidence:
-      - VPC / ECS / RDS 構成の設計と本番運用を担当
-    links:
-      - label: AWS Well-Architected Framework
-        url: https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html
+      - life-repo と gcp-cert-master の 2 サービスを ap-northeast-1 に自力で構築し稼働させている
+      - 使用実績のあるサービスは Lambda・API Gateway HTTP API・Cognito・DynamoDB・S3 + CloudFront(OAC)・SQS FIFO + DLQ・SSM Parameter Store・SNS・CloudWatch Alarms・Budgets・Amplify Hosting
+      - コスト監視まで含めて設計している（Budgets モジュールを任意有効化できる形で分離）
+    notes: VPC・ネットワーク設計とコンテナ基盤（ECS/EKS）の実績はゼロ。マネージドのサーバーレスに限る。AWS 認定 12 冠は本人記述（gcp-cert-master/README.md）だが取得証跡は未確認＝要確認。
+
+  - id: cloud-iam
+    name: IAM / 権限設計
+    category: cloud
+    level: 3
+    target: 4
+    last_used: 2026-09
+    evidence:
+      - GitHub Actions から OIDC で AssumeRole する構成を自作し、長期アクセスキーを一切発行していない
+      - 用途別にロールを分離している（plan は読み取り専用・apply・notes-export・release）
+      - 信頼ポリシーの sub を StringEquals の完全一致にし、plan は pull_request と main、apply は environment と main に限定
+      - apply 用ポリシー 293 行を「サービス別アクション × name_prefix-* の ARN」の交差だけに絞り、resources の全許可には理由コメントを付けている
+      - immutable subject claims（数値 ID 入りの sub）への切り替えにも対応済み
+    notes: 対象は単一アカウント。マルチアカウント（Organizations / SCP / Control Tower）の経験はない。
+
+  - id: cloud-serverless-design
+    name: イベント駆動 / 非同期設計
+    category: cloud
+    level: 3
+    target: 4
+    last_used: 2026-09
+    evidence:
+      - life-repo で「API → SQS FIFO → writer Lambda → GitHub コミット」の非同期書き込みを設計
+      - MessageDeduplicationId で冪等化し、ReportBatchItemFailures で部分失敗に対応
+      - DLQ を maxReceiveCount=5 で設定し、visibility_timeout を関数タイムアウトの 6 倍に取る理由までコメントしている
+      - DLQ 非空と最古メッセージ 30 分超の 2 つで検知する設計にしている
+    notes: 失敗時の再投入（リドライブ）運用と、実トラフィックでの検証はしていない。
 
   - id: cloud-gcp
     name: Google Cloud
     category: cloud
     level: 1
-    target: 2
-    experience_years: 0.5
-    last_used: 2025-02
-    notes: サンプル値。個人検証で Cloud Run を触った程度。
+    target: 3
+    last_used: 2026-09
+    evidence:
+      - 認定 14 資格を 18 ヶ月・週 10 時間で取る学習計画と、資格ごとの出題範囲チェックリストを整備
+      - 受験の合格ゲートを 6 項目で定義し、充足率で進捗を判定する仕組みを自作
+    notes: リソース作成の実績はゼロ（Terraform に google provider が無い）。認定の取得表も空で、学習の準備段階。
 
-  # ---- data ----
-  - id: data-sql
-    name: SQL
-    category: data
+  # ---- infra ----
+  - id: infra-terraform
+    name: Terraform
+    category: infra
     level: 3
     target: 4
-    experience_years: 4
     last_used: 2026-10
     evidence:
-      - 分析用の集計クエリを設計し、実行計画を見ながらインデックスを追加
+      - 2 リポジトリで本番相当の構成をモジュール分割して管理（data / hosting / auth / api / cicd / budget など）
+      - モジュール間の循環依存を一方向に解く方針をコメントで残している
+      - for_each・dynamic statement・count による任意モジュール化・locals からの for 式導出を使い分けている
+      - moved ブロックでリソースを再作成せずにルート構成を移行した
+      - variables.tf に validation（regex / alltrue）を書き、不正な入力を plan 前に落としている
+      - tfstate 用 S3 を別 state の bootstrap で作成（prevent_destroy・バージョニング・SSE・public access block・90 日失効）
+      - backend を空にして -backend-config で渡し、アカウント ID をコードに埋めていない
+      - 書き込み専用属性（value_wo）でトークンを state に載せない
+      - required_version / provider のバージョンを固定し .terraform.lock.hcl をコミットしている
+    notes: 複数環境（dev/stg/prod）の分離、terraform test、tflint や tfsec の CI 実行は未経験。
 
-  - id: data-etl
-    name: ETL / データパイプライン
-    category: data
+  - id: infra-cicd
+    name: GitHub Actions / CI-CD
+    category: infra
+    level: 3
+    target: 4
+    last_used: 2026-10
+    evidence:
+      - terraform plan の結果を PR コメントに投稿する仕組みを自作（マーカーで既存コメントを更新・60000 字で切り詰め・失敗時もコメントを残してから exit 1）
+      - apply は workflow_dispatch のみ、かつ main 以外の ref を拒否する形に絞っている
+      - permissions をジョブ単位で最小化し、concurrency で競合する実行を直列化している
+      - Conventional Commits から semver を判定して Release を自動作成するワークフローを自作
+      - mise-action で .mise.toml を唯一の情報源にし、ローカルと CI のバージョンを一致させている
+      - dependabot で npm / github-actions / terraform を週次更新（グルーピング設定あり）
+    notes: サードパーティ action の SHA ピンは未徹底（gcp-cert-master は 19 箇所すべてタグ参照）。マトリクスビルド・再利用ワークフロー・クロスコンパイルは未経験。環境保護ルールによる承認ゲートは未設定。
+
+  - id: infra-docker
+    name: Docker / コンテナ
+    category: infra
     level: 2
     target: 3
-    experience_years: 1
     last_used: 2026-05
-    notes: 既存パイプラインの改修経験のみ。冪等性の設計は要レビュー。
+    evidence:
+      - 勉強会の教材として Dockerfile（python:3.12-slim・requirements 先コピーでレイヤキャッシュ・uvicorn 起動）と docker-compose を作成し、人に教えた
+      - CI で docker compose build → up → ヘルスチェックのポーリング待ち → 負荷試験 → always で down まで組んだ
+    notes: マルチステージビルド・非 root ユーザー・HEALTHCHECK・レジストリへの push は未経験。本番でコンテナを動かした実績はない。
+
+  - id: infra-observability
+    name: 可観測性 / 監視
+    category: infra
+    level: 2
+    target: 3
+    last_used: 2026-09
+    evidence:
+      - CloudWatch アラーム 2 本（DLQ 非空・最古メッセージ 30 分超）を SNS メール通知につないでいる
+      - CloudWatch Logs の保持期間を設定し、ログに本文を出さない配慮を入れている
+      - Go 側は slog による構造化ログと /healthz を実装
+    notes: メトリクス基盤（Prometheus 等）・分散トレーシング・SLO 設計・オンコール運用は未経験。
+
+  - id: infra-network
+    name: ネットワーク
+    category: infra
+    level: 1
+    target: 3
+    last_used: 2026-06
+    evidence:
+      - AWS Advanced Networking（ANS-C01）の学習でサービス別の要点ノートと、間隔反復つきの適応型クイズ TUI を自作した
+    notes: 構築の痕跡がない（作った構成はすべて VPC 不要のマネージド型）。知識としての学習のみ。業務経験があれば上書きすること＝要確認。
+
+  - id: infra-kubernetes
+    name: Kubernetes
+    category: infra
+    level: 0
+    target: 2
+    evidence:
+      - 痕跡なし。manifest・Helm・kind/minikube のいずれも見つからない
+    notes: Google Cloud の学習計画に GKE / Cloud Run の名前が出てくるだけ。target 2 は「触ったことがある」までを当面の目安として置いた値。
+
+  - id: infra-linux
+    name: Linux / サーバー運用
+    category: infra
+    level: 1
+    target: 3
+    last_used: 2026-10
+    evidence:
+      - macOS 上のターミナル環境を Git 管理し、setup.sh 一発で再現できる状態にしている
+    notes: サーバーの構築・運用・障害対応の痕跡が公開リポジトリに無い。インフラエンジニアの業務で日常的に触っているなら実態に合わせて上げること＝要確認。
+
+  # ---- languages ----
+  - id: lang-go
+    name: Go
+    category: languages
+    level: 3
+    target: 4
+    last_used: 2026-10
+    evidence:
+      - task-manager を 6 モジュール・約 1 万行で設計し、API と画面を別プロセスに分離した
+      - errors.Is / errors.As を 73 箇所、%w ラップを 78 箇所で使い、sentinel error と独自エラー型を使い分けている
+      - 層をまたぐときに sql.ErrNoRows をドメインのエラーへ変換している
+      - ORM を使わず database/sql を直接扱い、go:embed で自作マイグレータを実装
+      - SQLite の挙動を理解した DSN 設計（WAL・busy_timeout・_txlock=immediate に理由コメント）
+      - signal.NotifyContext と select による graceful shutdown（10 秒タイムアウト、ErrServerClosed を正常扱い）
+      - テスト 222 ケースをテーブル駆動で書き、-race で実行している
+      - golangci-lint で errorlint・gosec・noctx・sqlclosecheck・bodyclose を有効化
+    notes: 並行処理の設計経験は浅い（goroutine は shutdown の 1 箇所のみ、errgroup・worker pool なし）。ベンチマーク・プロファイリング・カバレッジ計測は未使用。
+
+  - id: lang-typescript
+    name: TypeScript
+    category: languages
+    level: 3
+    target: 4
+    last_used: 2026-10
+    evidence:
+      - life-repo を strict + noUncheckedIndexedAccess + noUnused* で約 3400 行書いている
+      - zod で外部入力を検証し、createHandler(deps) の依存性注入でテスト可能にしている
+      - vitest で 18 ファイル・約 126 ケース
+      - engineer-growth（このリポジトリ）を zod + 層分離で構成し、テスト 369 ケース
+    notes: 型レベルの作り込み（conditional types 等）や公開ライブラリの型定義は未経験。
+
+  - id: lang-bash
+    name: Bash / シェル
+    category: languages
+    level: 3
+    target: 3
+    last_used: 2026-10
+    evidence:
+      - setup.sh 308 行・uninstall.sh 438 行を set -euo pipefail と関数分割で書き、冪等にしている（導入済み判定・既存設定の .bak バックアップと復元）
+      - uninstall.sh に --dry-run・確認プロンプト・警告の集計・.zshrc の差分適用を実装
+      - gh CLI と jq で Issue を単一の情報源として Markdown 表を再生成するスクリプトを書いている
+      - 区切り文字に US(0x1f) を使う理由をコメントで説明している
+      - git log の \x1e 区切りが 2 件目以降に改行を残す問題を特定し、-z と read -d で修正した
+      - pre-commit に shellcheck と gitleaks を組み込んで常時検証している
+    notes: bats などによるシェルスクリプト自体の自動テストは無い。
+
+  - id: lang-python
+    name: Python
+    category: languages
+    level: 2
+    target: 3
+    last_used: 2026-07
+    evidence:
+      - FastAPI で CRUD + 部分更新の API を書き、pytest + TestClient で 110 行のテストを付けた（勉強会の教材として）
+      - 標準ライブラリのみで設定ファイルからキーバインド一覧を生成するスクリプトを書いた（unicodedata で全角幅を揃える処理まで）
+      - Textual で間隔反復つきのクイズ TUI を自作した
+    notes: 非同期処理・DB 連携・マイグレーション・型チェック（mypy）・パッケージ公開は未経験。
+
+  - id: lang-javascript
+    name: JavaScript
+    category: languages
+    level: 2
+    target: 2
+    last_used: 2026-10
+    evidence:
+      - 素の JS + JSDoc で Lambda 用の薄いルーターと手書きバリデータ（145 行）を実装
+      - Issue の内容を振り分ける Node スクリプト 185 行に、263 行のテストを付けている
+    notes: TypeScript を主に使うため、素の JS を伸ばす予定はない（target は現状維持）。
+
+  - id: lang-lua
+    name: Lua
+    category: languages
+    level: 1
+    target: 1
+    last_used: 2026-10
+    evidence:
+      - WezTerm の設定 175 行を書いている（イベントハンドラ、タブタイトルの整形、コールバックによるキー割り当て）
+    notes: 設定ファイルを書く範囲。Lua でアプリケーションを組んだことはない。
 
   # ---- practice ----
-  - id: prac-design-patterns
-    name: 設計パターン / アーキテクチャ
+  - id: prac-automation
+    name: 自動化の設計
     category: practice
     level: 3
     target: 4
-    experience_years: 3
     last_used: 2026-10
     evidence:
-      - レイヤ責務を定義したリポジトリ構成を設計し、チームに定着させた
-
-  - id: prac-code-review
-    name: コードレビュー
-    category: practice
-    level: 4
-    target: 4
-    experience_years: 3
-    last_used: 2026-10
-    evidence:
-      - レビュー観点リストを整備し、指摘の属人性を解消
-      - 新メンバーのレビューを継続的に担当
+      - Issue フォームからラベルを付ける仕組みで、排他グループを定義して古いラベルを外す処理を実装
+      - 本文編集時に状態ラベルが巻き戻らないよう onlyOnOpen で制御している
+      - inbox.md への追記 → Issue 化 → カテゴリラベル付与で Markdown に追記して自動クローズ、という流れを組んだ
+      - 重複は duplicate として追加せずに閉じる冪等設計、失敗時はラベルを戻してコメントしてから exit 1
+      - GITHUB_TOKEN による push が他のワークフローを再発火しないことを理由コメント付きで利用し、無限ループを防いでいる
+      - Issue 本文を ${{ }} でシェルに埋め込まず、スクリプトがイベント JSON から読む設計にしている
+    notes: 自分のための自動化が中心。チームの運用に自動化を入れた実績は不明＝要確認。
 
   - id: prac-security
-    name: セキュリティ
+    name: セキュリティ実践
     category: practice
-    level: 2
+    level: 3
     target: 4
-    experience_years: 2
-    last_used: 2026-08
-    notes: OWASP Top 10 を踏まえた指摘はできる。脅威モデリングは未経験。
+    last_used: 2026-10
+    evidence:
+      - OIDC + 用途別ロールで長期クレデンシャルを廃し、権限を ARN 単位まで絞っている
+      - gitleaks と detect-private-key を pre-commit に組み込んでいる
+      - Basic 認証の資格情報を SOPS(age) で暗号化して管理した
+      - 書き込み専用属性でシークレットを state に載せない、ログに本文を出さない配慮を入れている
+      - Cognito を MFA 必須 + PKCE で構成し、CloudFront に CSP・HSTS・frame DENY を設定
+      - ワークフローでシェルインジェクションを避ける書き方を選んでいる
+    notes: tfsec / checkov / govulncheck などの自動スキャンは未導入。サードパーティ action の SHA ピンも未徹底で、サプライチェーン対策は途上。
+
+  - id: prac-testing
+    name: テスト設計
+    category: practice
+    level: 3
+    target: 4
+    last_used: 2026-10
+    evidence:
+      - Go 222 ケース・vitest 126 ケース・node:test 78 ケース・pytest を、いずれも自分で設計して書いている
+      - fake API やインメモリの fake repository を用意して外部依存を切っている
+      - 「今日」を引数や s.now() で注入し、日付依存のテストを決定的にしている
+      - OpenAPI の定義と実装の 405 Allow ヘッダが一致するかをテストで照合している
+    notes: E2E（Playwright 等）・カバレッジ閾値・ベンチマーク・Fuzz・並列実行は未使用。
+
+  - id: prac-git
+    name: Git / PR 運用
+    category: practice
+    level: 3
+    target: 3
+    last_used: 2026-10
+    evidence:
+      - 日本語の Conventional Commits で、1 コミット 1 論点を保っている
+      - PR 単位の squash マージと、release-please / Release Drafter / 自作の semver 判定を使い分けている
+      - コミット規約を .claude/rules に文書化して運用に乗せた
+      - main への直接コミットを避け、ブランチと PR を通している
+    notes: 初期のリポジトリには規約外のメッセージが混在しており、規約化してから日が浅い。複数人でのレビュー運用の実績は不明＝要確認。
+
+  - id: prac-troubleshooting
+    name: 原因究明
+    category: practice
+    level: 3
+    target: 4
+    last_used: 2026-10
+    evidence:
+      - 自動リリースで patch が検出されない問題を、git log の区切り文字が 2 件目以降に改行を残すことまで特定して修正した
+      - 仮説と結果を表に整理し、「他のケースが通ったのは最新コミットが偶然判定対象だったから」と成功理由まで掘り下げている
+      - 再発防止を「リスト末尾・中間・先頭で試す」という一般形に落としている
+      - push 前にワークフローの run を yaml.safe_load で取り出し、gh をスタブに差し替えてローカル検証する手順を作った
+      - 未検証の範囲を明示して残している
+    notes: 記録に残した振り返りは 1 件のみ。母数が少ないので、この水準が再現するかはこれから。
+
+  - id: prac-ai-collaboration
+    name: AI 協働開発
+    category: practice
+    level: 3
+    target: 4
+    last_used: 2026-10
+    evidence:
+      - CLAUDE.md に方針を集約し、詳細を .claude/rules に分離する構成を自分で設計している
+      - Claude Code と Codex CLI で skill を symlink 共用し、同じ指示を 2 つのツールで使い回している
+      - /retro で振り返りを定型化し、保存先と一覧の更新まで自動化した
+      - 2026-09 以降、AI 協働を前提に 6 リポジトリを立ち上げて運用に乗せている
+      - 設計判断の理由をコードコメントに残す運用を徹底しており、後から読んで追える状態になっている
+    notes: 公開リポジトリのコミットの大半が AI 協働（gcp-cert-master 22/25、life-repo 14/18）。自力実装との切り分けは本人にしか判定できない。
 
   - id: prac-performance
-    name: パフォーマンスチューニング
+    name: 性能計測 / 負荷試験
     category: practice
+    level: 1
+    target: 3
+    last_used: 2026-05
+    evidence:
+      - k6 を CI に組み込み、しきい値（失敗率 1% 未満・p95 500ms 未満・チェック成功率 99% 超）で判定する仕組みを作った
+      - 結果をレポートとしてリポジトリに記録している（総リクエスト 66・p95 10.52ms・失敗 0%）
+    notes: 規模が 2VU・20 秒でスモーク相当。限界を探る負荷試験・プロファイリング・ボトルネック特定の経験はない。
+
+  # ---- backend ----
+  - id: be-api-design
+    name: API 設計 / OpenAPI
+    category: backend
+    level: 3
+    target: 4
+    last_used: 2026-10
+    evidence:
+      - OpenAPI 3.1 の定義を 677 行手書きし、エンドポイントから配信している
+      - エラーコードを「一度公開したら変更しない」契約として明記している
+      - 定義と実装のずれをテストで検知する仕組みを入れている
+      - REST API と CLI と画面の 3 つの入口を、同じ API の上に載せる設計にしている
+    notes: 定義からのコード生成（oapi-codegen 等）・API のバージョニング運用・外部公開 API の運用は未経験。
+
+  - id: be-database
+    name: データストア設計
+    category: backend
     level: 2
     target: 3
-    experience_years: 2
-    last_used: 2026-07
-    notes: 計測ツールは使えるが、ボトルネック特定は先輩と並走している。
+    last_used: 2026-10
+    evidence:
+      - DynamoDB の単一テーブル設計（pk/sk・PITR・SSE・削除保護）で、Scan を避けるための索引を設計している
+      - SQLite で CHECK 制約と部分ユニークインデックスを使い、「計測中タイマーは全体で 1 つ」という不変条件を DB 側で保証した
+      - BeginTx と defer Rollback のパターンでトランザクションを扱っている
+    notes: RDBMS（PostgreSQL / MySQL）の設計・運用・チューニング、マイグレーション運用、N+1 やインデックスの改善経験はない。
+
+  - id: be-auth
+    name: 認証 / 認可
+    category: backend
+    level: 2
+    target: 3
+    last_used: 2026-09
+    evidence:
+      - Cognito を MFA 必須・Managed Login v2・PKCE で構成し、フロントは oidc-client-ts で接続
+      - JWT の検証を API Gateway のオーソライザーに任せ、アプリは sub だけを受け取る設計にしている
+    notes: 自前の認可モデル（RBAC 等）の設計、トークンのローテーション運用、複数ロールの権限制御は未経験。
 
   # ---- soft ----
-  - id: soft-communication
-    name: コミュニケーション / 合意形成
+  - id: soft-workshop
+    name: 勉強会の運営 / 登壇
     category: soft
     level: 3
     target: 4
-    experience_years: 5
-    last_used: 2026-10
+    last_used: 2026-07
     evidence:
-      - 他チームとの仕様調整を主担当として完了
-
-  - id: soft-mentoring
-    name: メンタリング / 育成
-    category: soft
-    level: 2
-    target: 4
-    experience_years: 1
-    last_used: 2026-09
-    notes: 新メンバーのオンボーディング補助の経験のみ。
+      - 不定期勉強会を主催し、教材を自作して継続開催している
+      - 扱った題材は Docker（セッション 2〜6）・シェルスクリプト・Mac セットアップ・AWS ハンズオン・GitHub Release 入門
+      - AWS の講義資料（pptx）と、スクリーンショット 17 枚つきのハンズオン手順書を作成
+      - 参加者アンケートを集める CLI を自作し、Git/PR 練習用のブランチを参加者と共有した
+      - スライド解説動画を音声合成で作る仕組みまで用意した
+    notes: 社外のイベントでの登壇実績は確認できていない＝要確認。
 
   - id: soft-writing
-    name: 技術文書 / 発信
+    name: 技術文書 / 設計の言語化
     category: soft
     level: 3
     target: 4
-    experience_years: 2
     last_used: 2026-10
     evidence:
-      - 設計ドキュメントと障害報告を継続的に執筆し、社内で参照されている
+      - SPEC.md に前提と非目標を明記する習慣がある（「利用者は自分のみ、ローカルのみ、デプロイしない」）
+      - 設計判断の理由をコードコメントに残している（循環依存の解き方、トランザクション昇格の失敗、区切り文字の選定理由）
+      - 振り返りを定型のフォーマットで記録し、一覧を更新する運用にしている
+    notes: 外部に公開した技術記事はまだ 0 本。このリポジトリの blog/ が最初の場になる。
+
+  - id: soft-mentoring
+    name: 育成 / レビュー
+    category: soft
+    level: 2
+    target: 3
+    last_used: 2026-06
+    evidence:
+      - 勉強会で初学者向けの教材を作り、参加者のレビュー指摘に対応するやり取りをしている
+    notes: 1on1 や継続的な育成、他者のコードレビューを担当した実績は公開リポジトリから読み取れない＝要確認。
+
+  - id: soft-english
+    name: 英語
+    category: soft
+    level: 1
+    target: 2
+    last_used: 2026-10
+    evidence:
+      - 学習用のリポジトリを作成した（2026-10-10）
+    notes: README 以外は空で、学習はまだ始まっていない。公式ドキュメントを読む機会は多いはずなので、実態に合わせて上書きすること＝要確認。
+
+  # ---- frontend ----
+  - id: fe-web-basics
+    name: Web フロントエンド基礎
+    category: frontend
+    level: 2
+    target: 2
+    last_used: 2026-10
+    evidence:
+      - html/template と htmx によるサーバーサイドレンダリングで約 3200 行の画面を実装
+      - フレームワークを使わない vanilla TS で PWA を作っている
+      - 手書きの inline SVG でレーダーチャート・ガントチャート・スパークラインを描いている（このリポジトリ）
+    notes: アクセシビリティ・レスポンシブ設計・デザインシステムの知識は手薄。
+
+  - id: fe-react
+    name: React
+    category: frontend
+    level: 2
+    target: 2
+    last_used: 2026-09
+    evidence:
+      - React + Vite + TS strict で学習アプリの画面を実装し、React Testing Library でテストを書いている
+    notes: 状態管理ライブラリ・SSR・パフォーマンス最適化は未経験。インフラが主戦場なので target は現状維持。

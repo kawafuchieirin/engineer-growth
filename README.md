@@ -101,6 +101,7 @@ dist/           生成物（Git 管理外）    PROFILE.md  生成物（コミ�
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 構成とレイヤの実装契約
 - [docs/SKILLS_GUIDE.md](docs/SKILLS_GUIDE.md) — 自己評価の付け方、レベルの定義
+- [docs/ASSESSMENT.md](docs/ASSESSMENT.md) — 初版の棚卸しを何を根拠に付けたか、その限界
 - [docs/GOALS_GUIDE.md](docs/GOALS_GUIDE.md) — OKR の立て方と回し方
 - [docs/ROADMAP_GUIDE.md](docs/ROADMAP_GUIDE.md) — マイルストーンの切り方
 - [docs/BLOG_GUIDE.md](docs/BLOG_GUIDE.md) — 記事の書き方と front matter
