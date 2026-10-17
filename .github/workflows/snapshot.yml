@@ -86,7 +86,7 @@ jobs:
         console.log(level);
     steps:
       - name: リポジトリをチェックアウト
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # 資格情報を .git/config に残さず、push する最後のステップだけに
           # トークンを渡す。間に挟まるサードパーティ action にトークンを
@@ -94,8 +94,8 @@ jobs:
           persist-credentials: false
 
       - name: mise で Node をセットアップ（.mise.toml の宣言に従う）
-        # サードパーティ action は可変タグではなくコミット SHA で固定する。
-        # タグは作者が付け替えられるため、v5 のまま中身が差し替わると
+        # action は可変タグではなくコミット SHA で固定する。GitHub 製（actions/*）も
+        # 例外にしない。タグは作者が付け替えられるため、v5 のまま中身が差し替わると
         # 書き込み権限を持つこのワークフローがそのコードを実行してしまう。
         # SHA の更新は dependabot（github-actions エコシステム）が PR で提案する。
         uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
@@ -175,7 +175,7 @@ jobs:
         # YAML の読み取りは上のシェルステップに寄せ、このステップは
         # GitHub API との対話（重複確認・ラベル・Issue 作成）だけを担う。
         # 認証済みクライアントと paginate が要るので github-script を使う。
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           BEFORE_LEVEL: ${{ steps.before.outputs.level }}
           AFTER_LEVEL: ${{ steps.after.outputs.level }}
