@@ -21,11 +21,11 @@ snapshots:
   - date: 2026-10-17
     xp:
       skills: 1770
-      goals: 20
-      roadmap: 45
+      goals: 0
+      roadmap: 0
       blog: 0
       achievements: 50
-      total: 1885
+      total: 1820
     level: 8
     skillAverage: 2.47
     skillCount: 34
