@@ -30,9 +30,14 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # 同時に走ると同じファイルへの push が競合するので直列化する。
-  # 進行中のコミット/push は中断させない。
-  group: snapshot
+  # 【重要】profile.yml と snapshot.yml は同じグループを共有する。
+  # どちらも main に直接コミットして push するため、別グループだと
+  # 同一 push で同時に起動し、後から push した側が必ず弾かれる。
+  #   ! [remote rejected] HEAD -> main (cannot lock ref 'refs/heads/main':
+  #     is at <Profile のコミット> but expected <起動時の HEAD>)
+  # 2026-10-17 に実際に Snapshot がこれで失敗した。
+  # 進行中のコミット/push は中断させない（cancel-in-progress: false）。
+  group: write-main
   cancel-in-progress: false
 
 # トップレベルは読み取りのみ。書き込みは必要なジョブだけに付ける。
@@ -159,7 +164,19 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add data/history.yaml
           git commit -m 'chore: 成長の記録を追加' -m 'pnpm growth snapshot で data/history.yaml を更新した。[skip ci]'
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF_NAME}"
+          # concurrency で直列化していても、人手の push とは競合しうる。
+          # 生成物のコミットなので、取り込み直して載せ替えれば常に正しい。
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          for attempt in 1 2 3; do
+            if git push "$REMOTE" "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            echo "push が弾かれました（$attempt 回目）。取り込み直して再試行します。"
+            git fetch "$REMOTE" "${GITHUB_REF_NAME}"
+            git rebase FETCH_HEAD
+          done
+          echo "3 回試行しても push できませんでした" >&2
+          exit 1
 
       - name: 記録後のレベルを読む
         id: after
