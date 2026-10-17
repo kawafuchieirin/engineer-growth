@@ -161,6 +161,161 @@ ${parts.join('\n')}
   <p class="chart-caption">トラック別マイルストーン（${escapeHtml(model.months[0] ?? '')} 〜 ${escapeHtml(model.months.at(-1) ?? '')}）</p>`;
 }
 
+/** 依存グラフの寸法（SVG ユーザー単位）。 */
+const NODE_WIDTH = 150;
+const NODE_HEIGHT = 46;
+const COL_GAP = 54;
+const ROW_GAP = 16;
+const FLOW_PADDING = 10;
+const FLOW_LEGEND_HEIGHT = 30;
+/** ノードに入れるタイトルはこの文字数で打ち切る（全文は <title> で出す）。 */
+const NODE_MAX_CHARS = 11;
+
+/**
+ * depends_on を辿って、各マイルストーンの「段」を決める。
+ *
+ * 依存のないものを 0 段目に置き、依存先の最大段 + 1 を自分の段とする。
+ * ガントチャートは時間軸で並べるため「何が何の前提か」が読めない。
+ * この図はそこだけを見せるので、横軸は日付ではなく依存の深さである。
+ *
+ * 循環参照はスキーマ側（roadmap.ts の superRefine）で既に弾かれているが、
+ * ここでも訪問済み集合で打ち切って無限ループにしない。
+ */
+function dependencyDepths(
+  milestones: ReadonlyArray<MilestoneView>,
+): ReadonlyMap<string, number> {
+  const byId = new Map(milestones.map((milestone) => [milestone.id, milestone]));
+  const depths = new Map<string, number>();
+
+  const resolve = (id: string, seen: ReadonlySet<string>): number => {
+    const cached = depths.get(id);
+    if (cached !== undefined) return cached;
+    const milestone = byId.get(id);
+    // 未定義の依存先はスキーマ（roadmap.ts の superRefine）が既に弾くため通常は起きない。
+    // このガードは、将来 model の一部だけを渡す呼び出しが出たときに座標が NaN に
+    // ならないようにするための保険。
+    if (!milestone || seen.has(id)) return 0;
+    const nextSeen = new Set(seen).add(id);
+    const deps = (milestone.depends_on ?? []).filter((dep) => byId.has(dep));
+    const depth = deps.length === 0 ? 0 : Math.max(...deps.map((dep) => resolve(dep, nextSeen))) + 1;
+    depths.set(id, depth);
+    return depth;
+  };
+
+  for (const milestone of milestones) resolve(milestone.id, new Set());
+  return depths;
+}
+
+/**
+ * 依存の流れ図。「次に動かせるのはどれか」と「何がどれの前提か」を見せる。
+ *
+ * ガントチャートと役割を分けている。ガントは「いつ」、この図は「どの順で」。
+ * 行き先が未決定のあいだは、どのマイルストーンが決定に依存していて、
+ * どれが決定前でも動かせるのかが最も重要な情報になる。
+ */
+function flowChart(model: RoadmapModel): string {
+  const milestones = model.milestones;
+  if (milestones.length === 0) return '';
+
+  const depths = dependencyDepths(milestones);
+  const maxDepth = Math.max(...[...depths.values()], 0);
+
+  // 段ごとに縦に積む。段内の順序は model.milestones の順（start 昇順）を保つ。
+  const columns: MilestoneView[][] = Array.from({ length: maxDepth + 1 }, () => []);
+  for (const milestone of milestones) {
+    columns[depths.get(milestone.id) ?? 0]?.push(milestone);
+  }
+
+  const rowsMax = Math.max(...columns.map((column) => column.length), 1);
+  const width = FLOW_PADDING * 2 + (maxDepth + 1) * NODE_WIDTH + maxDepth * COL_GAP;
+  const height =
+    FLOW_PADDING * 2 + rowsMax * NODE_HEIGHT + (rowsMax - 1) * ROW_GAP + FLOW_LEGEND_HEIGHT;
+
+  const position = new Map<string, { x: number; y: number }>();
+  columns.forEach((column, columnIndex) => {
+    const columnHeight = column.length * NODE_HEIGHT + (column.length - 1) * ROW_GAP;
+    const offset = (rowsMax * NODE_HEIGHT + (rowsMax - 1) * ROW_GAP - columnHeight) / 2;
+    column.forEach((milestone, rowIndex) => {
+      position.set(milestone.id, {
+        x: FLOW_PADDING + columnIndex * (NODE_WIDTH + COL_GAP),
+        y: FLOW_PADDING + offset + rowIndex * (NODE_HEIGHT + ROW_GAP),
+      });
+    });
+  });
+
+  const edges: string[] = [];
+  const nodes: string[] = [];
+
+  // --- 依存の線（先に描いてノードの下に回す） ---
+  for (const milestone of milestones) {
+    const to = position.get(milestone.id);
+    if (!to) continue;
+    for (const dep of milestone.depends_on ?? []) {
+      const from = position.get(dep);
+      if (!from) continue;
+      const x1 = from.x + NODE_WIDTH;
+      const y1 = from.y + NODE_HEIGHT / 2;
+      const x2 = to.x;
+      const y2 = to.y + NODE_HEIGHT / 2;
+      const mid = x1 + (x2 - x1) / 2;
+      // 未完了の依存（blockers）は破線にする。待ちが見えるようにする。
+      const dash = milestone.blockers.includes(dep) ? ';stroke-dasharray:5 4' : '';
+      edges.push(
+        `    <path d="M ${x1} ${y1} C ${mid} ${y1}, ${mid} ${y2}, ${x2} ${y2}" style="fill:none;stroke:var(--border);stroke-width:2${dash}"></path>`,
+      );
+      edges.push(
+        `    <circle cx="${x2}" cy="${y2}" r="3" style="fill:var(--border)"></circle>`,
+      );
+    }
+  }
+
+  // --- ノード ---
+  for (const milestone of milestones) {
+    const at = position.get(milestone.id);
+    if (!at) continue;
+    const style = STATUS_STYLE[milestone.status];
+    // 依存が全部済んでいて、まだ完了していないもの = 今動かせるもの。
+    const ready = milestone.status !== 'done' && milestone.blockers.length === 0;
+    const outline = milestone.overdue
+      ? 'stroke:var(--danger);stroke-width:2;stroke-dasharray:4 3'
+      : ready
+        ? 'stroke:var(--accent);stroke-width:2'
+        : 'stroke:var(--border);stroke-width:1';
+    const steps =
+      milestone.stepsTotal > 0 ? `${milestone.stepsDone}/${milestone.stepsTotal}` : '-';
+
+    nodes.push(`    <g>
+      <title>${escapeHtml(milestone.title)}（${escapeHtml(style.label)}・${escapeHtml(milestone.trackName)}・${escapeHtml(milestone.start)} 〜 ${escapeHtml(milestone.due)}）</title>
+      <rect x="${at.x}" y="${at.y}" width="${NODE_WIDTH}" height="${NODE_HEIGHT}" rx="6" style="fill:var(--surface);${outline}"></rect>
+      <rect x="${at.x}" y="${at.y}" width="4" height="${NODE_HEIGHT}" rx="2" style="${style.fill}"></rect>
+      <text x="${at.x + 12}" y="${at.y + 19}" style="fill:var(--text);font-size:11px;font-weight:600">${escapeHtml(truncate(milestone.title, NODE_MAX_CHARS))}</text>
+      <text x="${at.x + 12}" y="${at.y + 35}" style="fill:var(--text-muted);font-size:10px">${escapeHtml(style.label)} ・ ステップ ${escapeHtml(steps)}</text>
+    </g>`);
+  }
+
+  // --- 凡例 ---
+  const legendY = height - 10;
+  const legend = [
+    `    <rect x="${FLOW_PADDING}" y="${legendY - 10}" width="12" height="12" rx="3" style="fill:var(--surface);stroke:var(--accent);stroke-width:2"></rect>`,
+    `    <text x="${FLOW_PADDING + 18}" y="${legendY}" style="fill:var(--text-muted);font-size:11px">今動かせる（依存なし）</text>`,
+    `    <path d="M ${FLOW_PADDING + 186} ${legendY - 4} L ${FLOW_PADDING + 222} ${legendY - 4}" style="fill:none;stroke:var(--border);stroke-width:2;stroke-dasharray:5 4"></path>`,
+    `    <text x="${FLOW_PADDING + 228} " y="${legendY}" style="fill:var(--text-muted);font-size:11px">未完了の依存（待ち）</text>`,
+  ];
+
+  const readyCount = milestones.filter(
+    (milestone) => milestone.status !== 'done' && milestone.blockers.length === 0,
+  ).length;
+
+  return `  <svg class="chart" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="マイルストーンの依存関係図">
+    <title>マイルストーンの依存関係図</title>
+    <desc>マイルストーンを依存の深さで左から右に並べ、前提となる関係を線で結んだ図。</desc>
+${edges.join('\n')}
+${nodes.join('\n')}
+${legend.join('\n')}
+  </svg>
+  <p class="chart-caption">依存の流れ（左が前提、右が後続）。いま着手できるのは ${readyCount} 件。</p>`;
+}
+
 function milestoneBadges(milestone: MilestoneView): string {
   const style = STATUS_STYLE[milestone.status];
   const badges = [`<span class="${style.badge}">${escapeHtml(style.label)}</span>`];
@@ -267,6 +422,10 @@ export function renderRoadmapPage(model: RoadmapModel, generatedAt: string): str
 
   <h2>全体像</h2>
 ${ganttChart(model)}
+
+  <h2>どの順で動かすか</h2>
+  <p class="metric-label">ガントチャートは「いつ」、この図は「どの順で」。左が前提、右が後続。枠が強調されているものは依存が済んでいて、今すぐ着手できる。</p>
+${flowChart(model)}
 
 ${attentionSection(model)}
 
