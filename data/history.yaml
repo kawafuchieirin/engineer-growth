@@ -18,3 +18,20 @@ snapshots:
     achievements:
       - evidence-ten
       - first-self-reliant-skill
+  - date: 2026-10-17
+    xp:
+      skills: 1770
+      goals: 20
+      roadmap: 45
+      blog: 0
+      achievements: 50
+      total: 1885
+    level: 8
+    skillAverage: 2.47
+    skillCount: 34
+    posts: 0
+    milestonesDone: 0
+    goalsDone: 0
+    achievements:
+      - evidence-ten
+      - first-self-reliant-skill
