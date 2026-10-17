@@ -1,121 +1,206 @@
 # ロードマップの単一の信頼できる情報源。
 #
-# ■ ここに書いてあるのは data/skills.yaml で見えた空白と、本人が文書に残した
-#   計画から引いた下書き。「やると決めた」ものではないので、要らないものは消すこと。
-# ■ steps の done は、終わったものだけ true にする。進捗はこの比率で出る。
+# ■ 2026-10-17 の聞き取りで決まった方向に基づく。前提は data/goals.yaml の冒頭を参照。
+#
+# ■ 設計の中心にある考え方: **時間の出どころで軸を分ける。**
+#
+#     work  軸 … 業務の中で達成する。学習時間（週 5 時間未満）を消費しない。
+#                 機会を取るかどうかの問題であって、勉強量の問題ではない。
+#     study 軸 … 週 5 時間未満の学習枠を使う。**一度に 1 つしか進められない。**
+#
+#   この分離をしないと「GCP 14 資格 + 社内に仕組み + 設計主導 + 発信」を
+#   週 5 時間に詰め込む計画になり、必ず破綻する。
+#
+# ■ 週 5 時間未満 = 四半期で約 60 時間。study 軸のマイルストーンは
+#   1 四半期に 1 つまで。それ以上置かない。
+#
+# ■ 意図的に入れていないもの:
+#     - Kubernetes … 求人の必須要件は 12 件中 2 件（assessment/VIEW_MARKET.md）。
+#       週 5 時間未満では費用対効果が悪い。「任せられる人」にも必須ではない。
+#     - GCP の 2 本目以降 … 1 本目を通してから、実際にかかった時間を見て決める。
+#       計画段階で 14 本並べるのは、過去に同じことをして取得 0 件だったやり方。
+#     - 大規模運用（1 万 QPS 等） … 今の環境では原理的に積めない。
+#       行き先を「今の環境で任せられる人」に決めたため、追わない。
 #
 # 書き方の指針は docs/ROADMAP_GUIDE.md を参照。
-#   - tracks     … 並行して伸ばす軸。3〜4 本に絞る（増やすと「全部やる」計画になる）。
-#   - milestones … 1〜3ヶ月で終わる塊。outcome に「何ができたら終わりか」を書く。
-#   - depends_on … 先に終わっていないと着手しても無駄になるものだけを書く。
 
-updated: 2026-10-12
+updated: 2026-10-17
 
 tracks:
-  - id: foundation
-    name: 土台（棚卸しと記録）
-  - id: cloud
-    name: クラウド / インフラの空白
+  - id: trust
+    name: 任せられる人になる（業務）
+  - id: platform
+    name: 仕組みを社内に出す（業務）
+  - id: gcp
+    name: Google Cloud（学習枠）
   - id: output
-    name: 発信
-  - id: hardening
-    name: 自分の環境の堅牢化
+    name: 発信（学習枠）
 
 milestones:
-  - id: m-skills-baseline
-    title: スキル棚卸しの基準値を確定する
-    track: foundation
-    status: in_progress
-    start: 2026-10-12
-    due: 2026-10-31
-    skills: [soft-writing]
-    goals: [g-2026q4-skills-truth]
+  # ---- 2026-Q4 ----
+  - id: m-postmortem-habit
+    title: 障害対応にポストモーテムを入れる
+    track: trust
+    status: planned
+    start: 2026-10-20
+    due: 2026-12-19
+    skills: [infra-incident-response, prac-troubleshooting, soft-writing]
+    goals: [g-2026q4-postmortem]
     outcome: |
-      data/skills.yaml に「要確認」が 1 件も残っておらず、業務での経験も反映されている。
-      snapshot が 1 件以上記録され、次回実行で差分が出る状態になっている。
+      自分が一次対応した障害について、検知・影響・緩和・原因・再発防止が
+      文書として残っている。2 件書いて形が固まり、3 件目は迷わず書ける状態。
+      少なくとも 1 件は再発防止の変更がチームに通っている。
     steps:
-      - description: 公開リポジトリの痕跡から初版を作る
-        done: true
-      - description: 業務経験（Linux・ネットワーク・チームでのレビュー）を反映する
-        done: true
-      - description: AWS 認定の取得状況を確定し、根拠として書く
-        done: true
-      - description: snapshot を実行して基準値を記録する
+      - description: 直近に対応した障害 1 件を /retro の形式で書く
+        done: false
+      - description: チームに共有し、再発防止の変更を 1 つ提案して通す
+        done: false
+      - description: 2 件目を書き、テンプレートとして形を固める
         done: false
 
-  - id: m-first-post
+  - id: m-first-article
     title: 最初の技術記事を公開する
     track: output
     status: planned
-    start: 2026-10-20
-    due: 2026-11-30
+    start: 2026-11-01
+    due: 2026-12-31
     skills: [soft-writing, prac-troubleshooting]
-    goals: [g-2026q4-output]
+    goals: [g-2026q4-first-output]
     outcome: |
-      記事が 1 本公開され、ネタ出しから公開までの流れが自分の中で一度回っている。
+      記事が 1 本公開され、ネタ出しから公開までの流れが一度通っている。
       題材は作ったものではなく「詰まって解いた過程」で、再現手順まで書かれている。
     steps:
-      - description: 題材を選ぶ（自動リリースの区切り文字の件が最有力）
+      - description: 題材を選ぶ（ポストモーテム 1 件目、または自動リリースの区切り文字の件）
         done: false
-      - description: 下書きを blog/drafts に書く
+      - description: blog/drafts に下書きを書く
         done: false
-      - description: 公開して PROFILE.md に反映されることを確認する
+      - description: 公開し、PROFILE.md に反映されることを確認する
         done: false
-    depends_on: [m-skills-baseline]
+    depends_on: [m-postmortem-habit]
 
-  - id: m-sha-pin
-    title: Actions のサプライチェーン対策を全リポジトリに広げる
-    track: hardening
+  # ---- 2027-Q1 ----
+  - id: m-gcp-ace
+    title: Google Cloud の 1 本目に合格する
+    track: gcp
     status: planned
-    start: 2026-11-01
-    due: 2026-11-30
-    skills: [prac-security, infra-cicd]
-    outcome: |
-      書き込み権限を持つワークフローのサードパーティ action が、すべてコミット SHA で
-      固定されている。dependabot が SHA の更新を PR で提案する状態になっている。
-    steps:
-      - description: 書き込み権限を持つワークフローを全リポジトリから洗い出す
-        done: false
-      - description: サードパーティ action を SHA に固定する
-        done: false
-      - description: dependabot の github-actions エコシステムを有効にする
-        done: false
-
-  - id: m-container-prod
-    title: コンテナを「教材」から「動かしているもの」にする
-    track: cloud
-    status: planned
-    start: 2026-12-01
-    due: 2027-01-31
-    skills: [infra-docker, cloud-aws]
-    outcome: |
-      自分のサービスのいずれかがコンテナとしてクラウド上で動いており、
-      イメージのビルドとデプロイが CI から自動で行われている。
-      マルチステージビルドと非 root 実行ができている。
-    steps:
-      - description: 対象を決める（task-manager の API が候補）
-        done: false
-      - description: マルチステージ・非 root の Dockerfile に書き直す
-        done: false
-      - description: レジストリへの push とデプロイを CI に組む
-        done: false
-
-  - id: m-network-hands-on
-    title: ネットワークを知識から構築経験に変える
-    track: cloud
-    status: planned
-    start: 2027-02-01
+    start: 2027-01-05
     due: 2027-03-31
-    skills: [infra-network, infra-terraform]
+    skills: [cloud-gcp]
+    goals: [g-2027q1-gcp-first]
     outcome: |
-      VPC・サブネット・ルーティング・セキュリティグループを Terraform で構築し、
-      そこにプライベート接続のリソースを置いた構成が自分の手元に残っている。
-      ANS の学習ノートの内容を、動くコードとして説明できる。
+      Associate Cloud Engineer に合格している。合格ゲート 6 項目を満たし、
+      初見の模試で 80% 以上を 2 回連続で取っている。
+      かかった実時間を記録し、2 本目以降の計画に使える状態。
     steps:
-      - description: VPC とサブネットを Terraform で構築する
+      - description: 出題範囲を棚卸しし、学習項目を 60 時間に収まる形に削る
         done: false
-      - description: プライベートサブネットのリソースへ到達する経路を作る
+      - description: ハンズオンで GCP のリソースを実際に作る（現在 0 件）
         done: false
-      - description: 構成図と設計判断の理由を残す
+      - description: 初見の模試で 80% 以上を 2 回連続で取る
         done: false
-    depends_on: [m-container-prod]
+      - description: 受験して合格する
+        done: false
+
+  - id: m-team-mechanism
+    title: チームが使う仕組みを 1 つ入れる
+    track: platform
+    status: planned
+    start: 2027-01-05
+    due: 2027-03-31
+    skills: [prac-automation, infra-cicd]
+    goals: [g-2027q2-platform]
+    outcome: |
+      自分が作った仕組みを、自分以外のメンバーが日常的に使っている。
+      使い方のドキュメントがあり、自分が不在でも回る。
+      対象は問わないが、ポストモーテムのテンプレート化が最も近い。
+    steps:
+      - description: 対象を決める（ポストモーテムの型、レビュー観点、CI の整備など）
+        done: false
+      - description: 既に 5 回作った型を転用して実装する
+        done: false
+      - description: チームに渡し、2 週間使われることを確認する
+        done: false
+    depends_on: [m-postmortem-habit]
+
+  # ---- 2027-Q2 ----
+  - id: m-design-lead
+    title: 設計を自分で起こして通す
+    track: trust
+    status: planned
+    start: 2027-04-01
+    due: 2027-06-30
+    skills: [infra-linux, cloud-aws, prac-git]
+    goals: [g-2027q2-platform]
+    outcome: |
+      既存構成の変更ではなく、自分が設計を起こした変更がレビューを通って
+      本番に入っている。選定理由を文書で説明し、合意を取った記録がある。
+      これが level 4（牽引）の Autonomy と Influence の証跡になる。
+    steps:
+      - description: 設計を起こす対象を見つける（ネットワーク構成の見直しが候補）
+        done: false
+      - description: 選定理由を 4 観点で比較した設計文書を書く
+        done: false
+      - description: レビューを通して合意を取り、本番に入れる
+        done: false
+    depends_on: [m-team-mechanism]
+
+  - id: m-mentoring
+    title: 後から入った人が自分で判断できる状態を作る
+    track: trust
+    status: planned
+    start: 2027-04-01
+    due: 2027-07-31
+    skills: [soft-mentoring, prac-git]
+    outcome: |
+      レビューで同じ指摘を繰り返さなくなっている。観点が文書化され、
+      新しく入った人が初回のレビューを単独で出せる。
+      level 4 の条件である「他者を育成できる」の証跡になる。
+    steps:
+      - description: 自分が繰り返している指摘を洗い出して観点に起こす
+        done: false
+      - description: 観点をチームで合意する
+        done: false
+      - description: 新しく入った人が単独でレビューを出せることを確認する
+        done: false
+    depends_on: [m-design-lead]
+
+  # ---- 2027-Q3 以降 ----
+  - id: m-gcp-next
+    title: Google Cloud の 2 本目を決めて取る
+    track: gcp
+    status: planned
+    start: 2027-08-01
+    due: 2027-12-31
+    skills: [cloud-gcp]
+    outcome: |
+      1 本目でかかった実時間をもとに、2 本目を 1 本だけ選んで取っている。
+      14 資格の計画は「実時間に基づいて書き直されている」か「畳まれている」。
+      どちらでもよいが、週 10 時間前提の計画をそのまま残してはいない。
+    steps:
+      - description: 1 本目の実時間を記録し、14 資格の計画を実時間で引き直す
+        done: false
+      - description: 2 本目を 1 本だけ選ぶ（Professional Cloud Architect が候補）
+        done: false
+      - description: 受験して合格する
+        done: false
+    depends_on: [m-gcp-ace]
+
+  - id: m-output-habit
+    title: 書いて出すことを習慣にする
+    track: output
+    status: planned
+    start: 2027-04-01
+    due: 2027-12-31
+    skills: [soft-writing, soft-workshop]
+    outcome: |
+      記事が合計 5 本以上あり、ネタ出しから公開までが型になっている。
+      止まっている社内勉強会（2026-07-04 で停止）も再開しているか、
+      記事に置き換わっている。どちらでもよいが、外に出る経路が 1 つは動いている。
+    steps:
+      - description: ポストモーテムを記事に書き直す流れを型にする
+        done: false
+      - description: 勉強会の再開、または記事への置き換えを決める
+        done: false
+      - description: 合計 5 本に到達する
+        done: false
+    depends_on: [m-first-article]

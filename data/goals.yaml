@@ -1,68 +1,74 @@
 # 目標（OKR）の単一の信頼できる情報源。
 #
-# ■ ここに書いてあるのは「本人のリポジトリに文書として残っている意思」だけを
-#   根拠にした下書き。勝手な想像で足した目標は入れていない。
-#   - GCP 認定        … gcp-cert-master/README.md に 18 ヶ月・週 10 時間の計画がある
-#   - 技術記事の公開  … このリポジトリを作った動機として本人が挙げた「ブログの執筆」
-#   - 棚卸しの精度    … data/skills.yaml に残した「要確認」を消す作業
-# ■ 本当にやりたいことが別にあるなら、遠慮なく丸ごと書き換えること。
-#   目標は人から渡されるものではなく、自分で決めるもの。
+# ■ 2026-10-17 の聞き取りで、本人が方向を決めた。この 4 つが前提になっている。
+#     1. 2〜3 年後の行き先 … 今の環境で「任せられる人」になる
+#     2. クラウドの軸     … GCP に広げる
+#     3. 強みの扱い       … 「仕組みを作って渡す」を職務にする（社内に入れる）
+#     4. 使える時間       … 学習と発信に週 5 時間未満
+#
+# ■ 最大の制約は 4 の「週 5 時間未満」。四半期で約 60 時間しかない。
+#   GCP 認定 14 資格の計画は「週 10 時間・18 ヶ月」前提で書かれているため、
+#   週 5 時間未満では 36 ヶ月かかる。全冠を当面の目標に置かないのは意図的。
+#
+# ■ 設計を分ける考え方（ここが重要）:
+#     「任せられる人になる」は学習時間ではなく**業務の中**で達成される。
+#     設計を起こす・技術選定を主導する・後進を育てる・社内に仕組みを入れる、は
+#     いずれも週 5 時間の学習枠を消費しない。機会を取るかどうかの問題。
+#     逆に GCP と発信は学習枠を使う。だから学習枠は 1 度に 1 つに絞る。
 #
 # 書き方の指針は docs/GOALS_GUIDE.md を参照。
-#   - objective … 定性的な「どうなりたいか」。数字を入れない。
-#   - key_results … 測定可能な成果。metric / target / current で進捗が計算される。
-#   - why … なぜやるのかの判断軸。四半期途中の取捨選択はこれを根拠に行うので必須。
 
 horizon:
   vision: |
-    AWS のサーバーレスで培った「コードから環境を再現できる」強みを、ネットワークと
-    コンテナまで広げて、クラウドを選ばず基盤を設計・運用できる状態にする。
-    あわせて、作ったものと詰まった過程を外に出し、勉強会の中だけで終わらせない。
-  updated: 2026-10-12
+    今の環境で「任せられる人」になる。設計を自分で起こして通し、技術選定の理由を
+    説明して合意を取り、後から入った人が自分で判断できる状態まで持っていく。
+    そのやり方として、自分が繰り返し作ってきた「行動を仕組みに変える装置」を
+    自分の外に出す。自分の道具で終わらせず、チームが使う仕組みにする。
+    クラウドは AWS を土台にしつつ Google Cloud にも手を伸ばし、
+    ベンダーに依存せず基盤を設計できる状態を目指す。
+  updated: 2026-10-17
 
 goals:
-  - id: g-2026q4-skills-truth
-    objective: この棚卸しを、自分が見て納得できる状態にする
+  - id: g-2026q4-postmortem
+    objective: 障害から学んだことが、自分の頭の外に残る状態にする
     quarter: 2026-Q4
-    status: in_progress
+    status: not_started
     why: |
-      初版は公開リポジトリの痕跡だけで付けた値で、業務経験が一切入っていない。
-      土台が実態とずれていると、この先の「伸びた」がすべて意味を失う。
-      数字を良くする作業ではなく、基準点を正しくする作業として先に片付ける。
-    skills: [soft-writing, prac-git]
+      本番障害の一次対応は担当しているが、ポストモーテムの文化がなく、
+      何を変えたかが残っていない。SRE の信頼性階層で言うと、監視と
+      インシデント対応は埋まっているのに、その上の 1 段だけが空いている。
+      ここは 3 つが同時に埋まる場所でもある。階層の空白、転職市場で最も弱い
+      「何を変えたか」、そしてやりたいことの 2 番目である発信の題材。
+      /retro の仕組みは自分で作ってあるので、道具は揃っている。
+    skills: [infra-incident-response, prac-troubleshooting, soft-writing]
     key_results:
-      - id: kr-unverified
-        description: notes に「要確認」と書いたスキルを、実態に合わせて確定させる
-        metric: 確定させたスキル数
-        target: 8
-        current: 8
+      - id: kr-postmortem-written
+        description: 自分が対応した障害をポストモーテムとして書く
+        metric: 書いたポストモーテムの件数
+        target: 2
+        current: 0
         unit: 件
-      - id: kr-baseline
-        description: 確定後の値を snapshot で記録し、成長の起点を作る
-        metric: data/history.yaml の記録件数
+      - id: kr-postmortem-shared
+        description: 書いたものをチームに共有し、再発防止の変更を 1 つ通す
+        metric: 通した変更の件数
         target: 1
         current: 0
         unit: 件
 
-  - id: g-2026q4-output
+  - id: g-2026q4-first-output
     objective: 自分がやったことを、リポジトリの外から読める形にする
     quarter: 2026-Q4
     status: not_started
     why: |
-      設計判断の理由をコメントに残す習慣はもうあるのに、外に出した記事は 0 本。
-      勉強会は参加者の分しか届かないが、記事は時間を越えて届く。
-      書くと理解の穴が見つかるので、発信は他者貢献である前に自分の検証手段になる。
+      やりたいことの 2 番目に「ブログの執筆」を挙げているのに記事は 0 本。
+      書く力は Markdown 15,237 行（Go より多い）で証明済みで、足りないのは
+      出す先だけ。業務の 5〜10 年が公開記録に一切残っていないという問題とも
+      同じ根を持つ。1 本出して流れを一度通すことが目的で、本数は追わない。
     skills: [soft-writing, prac-troubleshooting]
     key_results:
-      - id: kr-posts
+      - id: kr-article
         description: 技術記事を公開する
         metric: 公開した記事数
-        target: 3
-        current: 0
-        unit: 本
-      - id: kr-retro-to-post
-        description: 振り返りの記録を記事に書き直す（原因究明の過程をそのまま出す）
-        metric: 振り返りを元にした記事数
         target: 1
         current: 0
         unit: 本
@@ -72,26 +78,46 @@ goals:
     quarter: 2027-Q1
     status: not_started
     why: |
-      14 資格・18 ヶ月の計画と合格ゲートの定義まで作ったが、取得表はまだ空のまま。
-      仕組みを作る段階で止まっているので、1 本合格させて計画が実在することを証明する。
-      AWS 側で手が動く状態を作れているので、同じことをもう一つのクラウドでやる。
+      14 資格・18 ヶ月の計画と合格ゲートの定義、進捗を判定するアプリまで
+      作ってあるが、取得は 0 件。仕組みを作る段階で満足してしまう傾向が
+      ここに出ている。週 5 時間未満では全冠に 36 ヶ月かかるため、
+      当面は 1 本に絞る。1 本通せば、計画が実在することが証明できる。
     skills: [cloud-gcp]
     key_results:
-      - id: kr-mock
+      - id: kr-gcp-mock
         description: 初見の模試で 80% 以上を 2 回連続で取る
         metric: 基準を満たした回数
         target: 2
         current: 0
         unit: 回
-      - id: kr-gate
-        description: 自分で定義した合格ゲート 6 項目を満たす
-        metric: 充足した項目数
-        target: 6
-        current: 0
-        unit: 項目
-      - id: kr-pass
-        description: 認定試験に合格する
+      - id: kr-gcp-pass
+        description: Associate Cloud Engineer に合格する
         metric: 合格した資格数
         target: 1
         current: 0
         unit: 資格
+
+  - id: g-2027q2-platform
+    objective: 自分の作る仕組みを、チームが使うものにする
+    quarter: 2027-Q2
+    status: not_started
+    why: |
+      「自分の行動を仕組みに変える装置」を 5 回、技術スタックを変えて
+      独立に実装している。これは再現性のある能力だが、対象はすべて自分だった。
+      チームの運用に自動化を入れた実績はまだ無い（prac-automation の notes）。
+      「任せられる人」の条件は他者への影響なので、ここを越えないと level 4 には届かない。
+      既にある型の転用なので、学習時間はほとんど要らない。
+    skills: [prac-automation, infra-cicd, soft-mentoring]
+    key_results:
+      - id: kr-team-mechanism
+        description: チームが日常的に使う仕組みを 1 つ入れて定着させる
+        metric: 定着した仕組みの数
+        target: 1
+        current: 0
+        unit: 件
+      - id: kr-design-lead
+        description: 自分が起こした設計をレビューに通し、合意を取る
+        metric: 通した設計の件数
+        target: 1
+        current: 0
+        unit: 件
