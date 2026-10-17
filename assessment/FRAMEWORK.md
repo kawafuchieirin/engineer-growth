@@ -464,7 +464,7 @@ AtCoder の AI 対策は、調べた中で最も踏み込んでいる。禁止�
 |---|---|---|
 | Dangerous-Workflow | 10/10 | 危険なパターンなし |
 | Dependency-Update-Tool | 10/10 | dependabot を検出 |
-| Pinned-Dependencies | 7/10 | **third-party 8/8 は固定済み。GitHub 製 0/9 が未固定** |
+| Pinned-Dependencies | 7/10 | **third-party 8/8 は固定済み。GitHub 製 0/9 が未固定**（→ 2026-10-17 に 9/9 固定して解消） |
 | Token-Permissions | **0/10** | **過大な権限を検出** |
 | Vulnerabilities | **0/10** | **既知の脆弱性 10 件** |
 | License / Security-Policy / SAST / Fuzzing | 0/10 | 未整備 |
@@ -477,6 +477,8 @@ AtCoder の AI 対策は、調べた中で最も踏み込んでいる。禁止�
 2. **GitHub 製 action が 9 箇所すべて未固定**。「third-party は SHA 固定した」は
    正しかったが（8/8）、`actions/checkout` 等は対象外にしていた。
    自前測定の `gha:SHA ピン 1 / タグ参照 45` は、この区別をしていなかった。
+   **2026-10-17 に 9 箇所すべてを SHA に固定し、解消した**（`actions/*` も例外にしない方針を
+   ワークフローのコメントに明記）。
 3. **既知の脆弱性 12 件**（`pnpm audit`。critical 4 / high 1 / moderate 7）。
    うち **`yaml@2.6.1` は本番依存**で、深くネストした入力で Stack Overflow になる
    （修正は 2.8.3 以降）。`data/*.yaml` を読む唯一のパーサがこれ。

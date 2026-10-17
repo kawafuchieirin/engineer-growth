@@ -36,15 +36,15 @@ jobs:
       contents: read
     steps:
       - name: リポジトリをチェックアウト
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # push しないジョブなので、資格情報を .git/config に残さない
           # （後続のサードパーティ action から読めてしまうため）
           persist-credentials: false
 
       - name: mise で Node をセットアップ（.mise.toml の宣言に従う）
-        # サードパーティ action は可変タグではなくコミット SHA で固定する。
-        # タグは作者が付け替えられるため、v5 のまま中身が差し替わると
+        # action は可変タグではなくコミット SHA で固定する。GitHub 製（actions/*）も
+        # 例外にしない。タグは作者が付け替えられるため、v5 のまま中身が差し替わると
         # 書き込み権限を持つこのワークフローがそのコードを実行してしまう。
         # SHA の更新は dependabot（github-actions エコシステム）が PR で提案する。
         uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
@@ -64,10 +64,10 @@ jobs:
         run: pnpm build
 
       - name: Pages の設定を読み込む（base URL の解決）
-        uses: actions/configure-pages@v6
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - name: dist/ を Pages アーティファクトとしてアップロード
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: dist
 
@@ -85,4 +85,4 @@ jobs:
     steps:
       - name: アーティファクトを公開
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

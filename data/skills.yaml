@@ -143,7 +143,11 @@ skills:
       - Conventional Commits から semver を判定して Release を自動作成するワークフローを自作
       - mise-action で .mise.toml を唯一の情報源にし、ローカルと CI のバージョンを一致させている
       - dependabot で npm / github-actions / terraform を週次更新（グルーピング設定あり）
-    notes: サードパーティ action の SHA ピンは未徹底（gcp-cert-master は 19 箇所すべてタグ参照）。マトリクスビルド・再利用ワークフロー・クロスコンパイルは未経験。環境保護ルールによる承認ゲートは未設定。
+    notes: |
+      このリポジトリは action 17 箇所すべてを SHA で固定済み（GitHub 製も含む、2026-10-17）。
+      ただし gcp-cert-master は 19 箇所すべてタグ参照のままで、横展開はできていない。
+      マトリクスビルド・再利用ワークフロー・クロスコンパイルは未経験。
+      環境保護ルールによる承認ゲートは未設定。
 
   - id: infra-docker
     name: Docker / コンテナ
@@ -351,7 +355,11 @@ skills:
       - 書き込み専用属性でシークレットを state に載せない、ログに本文を出さない配慮を入れている
       - Cognito を MFA 必須 + PKCE で構成し、CloudFront に CSP・HSTS・frame DENY を設定
       - ワークフローでシェルインジェクションを避ける書き方を選んでいる
-    notes: tfsec / checkov / govulncheck などの自動スキャンは未導入。サードパーティ action の SHA ピンも未徹底で、サプライチェーン対策は途上。
+    notes: |
+      このリポジトリは action の SHA 固定を完了し、依存の既知脆弱性も 0 件にした（2026-10-17）。
+      ただし tfsec / checkov / govulncheck などの自動スキャンは未導入で、
+      「人が気をつける対策」から「機械が止める対策」には至っていない。
+      他リポジトリへの横展開も未了。
 
   - id: prac-testing
     name: テスト設計
