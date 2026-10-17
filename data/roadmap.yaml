@@ -1,6 +1,13 @@
 # ロードマップの単一の信頼できる情報源。
 #
-# ■ 2026-10-17 の聞き取りで決まった方向に基づく。前提は data/goals.yaml の冒頭を参照。
+# ■ 【重要】行き先は未決定。2027-03-31 までに候補 A〜G から 2 つ試して決める。
+#   候補と試し方は assessment/GROWTH_PATHS.md、前提は data/goals.yaml の冒頭を参照。
+#
+#   そのため、このロードマップは 2 層に分かれている。
+#     - 方向に依存しないもの … m-postmortem-habit / m-first-article / m-choose-direction
+#       （ポストモーテムは候補 7 つのうち 6 つで効くため、決める前から動かせる）
+#     - 方向に依存するもの   … m-team-mechanism 以降。m-choose-direction に依存させている
+#       日付は仮。決定後に引き直す前提で置いてある。
 #
 # ■ 設計の中心にある考え方: **時間の出どころで軸を分ける。**
 #
@@ -27,6 +34,8 @@
 updated: 2026-10-17
 
 tracks:
+  - id: explore
+    name: 方向を決める（期限つき）
   - id: trust
     name: 任せられる人になる（業務）
   - id: platform
@@ -37,7 +46,33 @@ tracks:
     name: 発信（学習枠）
 
 milestones:
-  # ---- 2026-Q4 ----
+  # ---- 方向を決める（これが他の前提になる）----
+  - id: m-choose-direction
+    title: 伸ばす方向を 2 つ試して 1 つ選ぶ
+    track: explore
+    status: in_progress
+    start: 2026-10-20
+    due: 2027-03-31
+    skills: [soft-writing, prac-troubleshooting]
+    goals: [g-2026q4-choose-direction]
+    outcome: |
+      候補 A（今の環境で任せられる人）と B（仕組みを作って渡す）を実際に小さく試し、
+      どちらが面白かったかを記録したうえで 1 つ選んでいる。
+      選んだ理由が horizon.vision に自分の言葉で書かれている。
+      2 つ試して決まらなかった場合は、候補を入れ替えて期限を延ばす。それも結果として記録する。
+    steps:
+      - description: ポストモーテムを 1 件書く（A と B の共通の 1 手）
+        done: false
+      - description: A を試す（チームに共有し、再発防止の変更を通す）
+        done: false
+      - description: B を試す（テンプレート化して、チームが使う形にする）
+        done: false
+      - description: どちらが面白かったかを記録する（やった直後に書く）
+        done: false
+      - description: 1 つ選び、horizon.vision を自分の言葉で書き直す
+        done: false
+
+  # ---- 2026-Q4（方向に依存しない）----
   - id: m-postmortem-habit
     title: 障害対応にポストモーテムを入れる
     track: trust
@@ -120,7 +155,8 @@ milestones:
         done: false
       - description: チームに渡し、2 週間使われることを確認する
         done: false
-    depends_on: [m-postmortem-habit]
+    # 候補 B を選んだ場合に本格化する。試す範囲は m-choose-direction で動く。
+    depends_on: [m-choose-direction]
 
   # ---- 2027-Q2 ----
   - id: m-design-lead
@@ -142,7 +178,8 @@ milestones:
         done: false
       - description: レビューを通して合意を取り、本番に入れる
         done: false
-    depends_on: [m-team-mechanism]
+    # 候補 A を選んだ場合に本格化する。
+    depends_on: [m-choose-direction]
 
   - id: m-mentoring
     title: 後から入った人が自分で判断できる状態を作る
